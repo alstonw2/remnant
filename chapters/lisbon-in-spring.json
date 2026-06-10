@@ -1,0 +1,12 @@
+{
+  "title": "Lisbon, in Spring",
+  "eyebrow": "Saved chapter · sample",
+  "narrative": "We came for the pastéis and stayed for the light. Somewhere between the tram bells and the tiled hills, four days became the kind of memory a family retells for decades.",
+  "slides": [
+    { "demo": "🌅", "bg": "linear-gradient(135deg,#E8985E,#C4713A)", "caption": "First morning over the Alfama rooftops.", "why": "Chosen as the opening — it sets the light the whole trip lived in." },
+    { "demo": "🚋", "bg": "linear-gradient(135deg,#5E8C7B,#2D4A3E)", "caption": "Tram 28, exactly as crowded as promised.", "why": "The most retold story of the trip belongs in its chapter." },
+    { "demo": "🥮", "bg": "linear-gradient(135deg,#D9B36A,#B8953F)", "caption": "Six pastéis de nata. None survived.", "why": "Food photos carry memory — this one had everyone's hands in frame." },
+    { "demo": "🌊", "bg": "linear-gradient(135deg,#6A93A8,#3D5B6E)", "caption": "Cabo da Roca — the edge of the continent.", "why": "The only photo where everyone is looking at the same horizon." },
+    { "demo": "🌙", "bg": "linear-gradient(135deg,#4A4070,#2C2645)", "caption": "Last night, fado drifting up the street.", "why": "A closing image — quieter than the rest, the way trips actually end." }
+  ]
+}
