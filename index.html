@@ -6,6 +6,8 @@
   <title>Remnant — Honor the life you've lived</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --cream:    #FAF7F2;
@@ -732,6 +734,76 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Collage layout inside the stage */
+    .collage {
+      width: 100%; height: 100%;
+      display: grid;
+      gap: 4px;
+      padding: 4px;
+      background: var(--green);
+    }
+    .collage.n2 { grid-template-columns: 1fr 1fr; }
+    .collage.n3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+    .collage.n3 :first-child { grid-row: span 2; }
+    .collage.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    .collage > div, .collage > img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+      overflow: hidden;
+    }
+    .collage-badge {
+      position: absolute;
+      top: .75rem; left: .75rem;
+      background: rgba(0,0,0,.45);
+      color: #fff;
+      font-size: .68rem;
+      font-weight: 600;
+      padding: .25rem .6rem;
+      border-radius: 1rem;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Editable fields */
+    [contenteditable="true"] {
+      outline: none;
+      border-radius: 8px;
+      transition: background .15s, box-shadow .15s;
+      cursor: text;
+    }
+    .editing [contenteditable="true"] {
+      background: rgba(196,113,58,.06);
+      box-shadow: 0 0 0 1.5px rgba(196,113,58,.25);
+      padding: .15rem .4rem;
+    }
+    .edit-hint {
+      display: none;
+      font-size: .72rem;
+      color: var(--terra);
+      font-weight: 600;
+      margin-bottom: .75rem;
+    }
+    .editing .edit-hint { display: block; }
+
+    /* Map */
+    .chapter-map {
+      height: 320px;
+      border-radius: 16px;
+      margin-top: 1.5rem;
+      border: 1px solid rgba(0,0,0,.08);
+      z-index: 1;
+    }
+    .map-label {
+      font-family: 'Lora', serif;
+      font-size: 1rem;
+      color: var(--green);
+      font-weight: 600;
+      margin: 2rem 0 .5rem;
+    }
+    .leaflet-popup-content { font-family: 'Inter', sans-serif; font-size: .85rem; }
+
     /* ── Animations ──────────────────────────────── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(18px); }
@@ -1412,14 +1484,20 @@
 
   <!-- Viewer -->
   <div id="chapter-viewer">
-    <div class="step-eyebrow" id="viewer-eyebrow">Chapter</div>
-    <h2 class="step-title" id="viewer-title"></h2>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div class="step-eyebrow" id="viewer-eyebrow">Chapter</div>
+        <h2 class="step-title" id="viewer-title" data-field="title"></h2>
+      </div>
+      <button class="btn-back" id="edit-toggle" onclick="toggleEdit()">✏️ Edit story</button>
+    </div>
+    <div class="edit-hint">✏️ Edit mode on — click the title, story, or any caption to rewrite it. Changes are saved when you export.</div>
 
     <div class="viewer-stage" id="viewer-stage"></div>
     <div class="viewer-dots" id="viewer-dots"></div>
 
     <div class="viewer-caption">
-      <div class="cap" id="viewer-cap"></div>
+      <div class="cap" id="viewer-cap" data-field="caption"></div>
       <div class="why" id="viewer-why"></div>
     </div>
 
@@ -1429,7 +1507,12 @@
       <button class="ctrl-btn" onclick="slideStep(1)">→</button>
     </div>
 
-    <div class="chapter-narrative" id="viewer-narrative"></div>
+    <div class="chapter-narrative" id="viewer-narrative" data-field="narrative"></div>
+
+    <div id="map-section" class="hidden">
+      <div class="map-label">📍 Where this chapter took place</div>
+      <div class="chapter-map" id="chapter-map"></div>
+    </div>
 
     <div style="display:flex;gap:.75rem;margin-top:2rem;flex-wrap:wrap;justify-content:center">
       <button class="btn-back" onclick="backToSetup()">← Curate another chapter</button>
@@ -1961,8 +2044,9 @@ async function loadSavedChapters() {
     const list = document.getElementById('saved-list');
     list.innerHTML = '';
     for (const file of manifest.chapters) {
-      const c = await fetch('chapters/' + file).then(r => r.json());
-      const cover = c.slides[0];
+      const c = await fetch('chapters/' + file, { cache: 'no-store' }).then(r => r.json());
+      const first = c.slides[0];
+      const cover = first.collage ? first.collage[0] : first;
       const card = document.createElement('div');
       card.className = 'toggle-card';
       card.style.flexDirection = 'column';
@@ -1977,7 +2061,7 @@ async function loadSavedChapters() {
         </div>`;
       card.onclick = () => {
         slides = c.slides;
-        showChapter(c.title, c.narrative, c.eyebrow || 'Saved chapter');
+        showChapter(c.title, c.narrative, c.eyebrow || 'Saved chapter', c.locations || []);
       };
       list.appendChild(card);
     }
@@ -2067,10 +2151,17 @@ async function runCuration() {
     type: 'text',
     text: `You are the photo curator for Remnant, a legacy product that turns camera rolls into life chapters. Context from the user: "${context}".
 
-Below are ${chapterPhotos.length} photos, numbered 0 to ${chapterPhotos.length - 1} in order. Select the 5–8 that best TELL THE STORY of this chapter — favor emotional and narrative value over technical quality, skip near-duplicates, and order them so they read as a story.
+Below are ${chapterPhotos.length} photos, numbered 0 to ${chapterPhotos.length - 1} in order. Build a story of 5–8 slides that best TELL THE STORY of this chapter — favor emotional and narrative value over technical quality, skip near-duplicates, and order them so they read as a story.
+
+Each slide is either:
+- a SINGLE hero photo (use for the most powerful, standalone moments), or
+- a COLLAGE of 2–4 related photos (use for clusters that belong together — a meal, a group of friends, several views of one place).
+Mix the two: aim for at least one collage if the photos support it, but never force it.
+
+Also infer the real-world places this chapter happened and give approximate coordinates for a map.
 
 Respond with ONLY valid JSON, no markdown fences:
-{"title": "evocative 2-5 word chapter title", "narrative": "2-3 warm sentences connecting the chapter, written like a memoir", "selections": [{"index": 0, "caption": "one warm sentence for this photo", "why": "one short sentence on why this photo was chosen"}]}`
+{"title":"evocative 2-5 word chapter title","narrative":"2-3 warm sentences connecting the chapter, written like a memoir","locations":[{"name":"City, Country","lat":38.72,"lng":-9.14}],"slides":[{"type":"single","index":0,"caption":"one warm sentence","why":"one short sentence on why chosen"},{"type":"collage","indices":[2,3,4],"caption":"one warm sentence for the group","why":"why these belong together"}]}`
   }];
   chapterPhotos.forEach((p, i) => {
     content.push({ type: 'text', text: `Photo ${i}:` });
@@ -2095,10 +2186,16 @@ Respond with ONLY valid JSON, no markdown fences:
     const data = await res.json();
     const text = data.content.map(b => b.text || '').join('');
     const parsed = JSON.parse(text.replace(/^```json?\s*|\s*```$/g, ''));
-    slides = parsed.selections
-      .filter(s => chapterPhotos[s.index])
-      .map(s => ({ src: chapterPhotos[s.index].dataUrl, caption: s.caption, why: s.why }));
-    showChapter(parsed.title, parsed.narrative, 'Curated by AI · ' + new Date().toLocaleDateString());
+    const photoAt = i => chapterPhotos[i] ? { src: chapterPhotos[i].dataUrl } : null;
+    slides = (parsed.slides || parsed.selections || []).map(s => {
+      if (s.type === 'collage' && Array.isArray(s.indices)) {
+        const items = s.indices.map(photoAt).filter(Boolean);
+        return items.length ? { collage: items, caption: s.caption, why: s.why } : null;
+      }
+      const p = photoAt(s.index);
+      return p ? { ...p, caption: s.caption, why: s.why } : null;
+    }).filter(Boolean);
+    showChapter(parsed.title, parsed.narrative, 'Curated by AI · ' + new Date().toLocaleDateString(), parsed.locations || []);
   } catch (e) {
     showChapterError(e.message);
   } finally {
@@ -2117,9 +2214,18 @@ function showChapterError(msg) {
 const DEMO = {
   title: 'Lisbon, in Spring',
   narrative: 'We came for the pastéis and stayed for the light. Somewhere between the tram bells and the tiled hills, four days became the kind of memory a family retells for decades.',
+  locations: [
+    { name: 'Lisbon, Portugal', lat: 38.7223, lng: -9.1393 },
+    { name: 'Cabo da Roca, Portugal', lat: 38.7805, lng: -9.4989 },
+    { name: 'Sintra, Portugal', lat: 38.7989, lng: -9.3883 }
+  ],
   slides: [
     { demo: '🌅', bg: 'linear-gradient(135deg,#E8985E,#C4713A)', caption: 'First morning over the Alfama rooftops.', why: 'Chosen as the opening — it sets the light the whole trip lived in.' },
-    { demo: '🚋', bg: 'linear-gradient(135deg,#5E8C7B,#2D4A3E)', caption: 'Tram 28, exactly as crowded as promised.', why: 'The most retold story of the trip belongs in its chapter.' },
+    { collage: [
+        { demo: '🚋', bg: 'linear-gradient(135deg,#5E8C7B,#2D4A3E)' },
+        { demo: '🏛️', bg: 'linear-gradient(135deg,#7A8C9E,#3D5B6E)' },
+        { demo: '🎨', bg: 'linear-gradient(135deg,#C98B6A,#9E5B3A)' }
+      ], caption: 'A morning wandering the tiled hills.', why: 'Three views of the same neighborhood — stronger together than apart.' },
     { demo: '🥮', bg: 'linear-gradient(135deg,#D9B36A,#B8953F)', caption: 'Six pastéis de nata. None survived.', why: 'Food photos carry memory — this one had everyone\'s hands in frame.' },
     { demo: '🌊', bg: 'linear-gradient(135deg,#6A93A8,#3D5B6E)', caption: 'Cabo da Roca — the edge of the continent.', why: 'The only photo where everyone is looking at the same horizon.' },
     { demo: '🌙', bg: 'linear-gradient(135deg,#4A4070,#2C2645)', caption: 'Last night, fado drifting up the street.', why: 'A closing image — quieter than the rest, the way trips actually end.' }
@@ -2128,13 +2234,16 @@ const DEMO = {
 
 function loadDemo() {
   slides = DEMO.slides;
-  showChapter(DEMO.title, DEMO.narrative, 'Sample chapter · what AI curation produces');
+  showChapter(DEMO.title, DEMO.narrative, 'Sample chapter · what AI curation produces', DEMO.locations);
 }
 
 // ── Viewer ────────────────────────────────────
-function showChapter(title, narrative, eyebrow) {
+let chapterMap = null, editing = false;
+
+function showChapter(title, narrative, eyebrow, locations = []) {
   stopPlay();
-  currentChapter = { title, narrative, eyebrow, slides };
+  if (editing) toggleEdit();
+  currentChapter = { title, narrative, eyebrow, locations, slides };
   document.getElementById('chapter-setup').style.display = 'none';
   document.getElementById('chapter-viewer').style.display = 'block';
   document.getElementById('viewer-eyebrow').textContent = eyebrow;
@@ -2147,23 +2256,90 @@ function showChapter(title, narrative, eyebrow) {
 
   slideIdx = 0;
   renderSlide();
+  renderMap(locations);
   window.scrollTo(0, 0);
+}
+
+function mediaTile(item, single) {
+  if (item.video) return `<video src="${item.video}" ${single ? 'controls' : 'muted loop'} style="width:100%;height:100%;object-fit:cover"></video>`;
+  if (item.src)   return single ? `<img src="${item.src}" alt="">` : `<img src="${item.src}" alt="">`;
+  return `<div class="${single ? 'demo-slide' : ''}" style="background:${item.bg}">${item.demo || ''}</div>`;
 }
 
 function renderSlide() {
   const s = slides[slideIdx];
   const stage = document.getElementById('viewer-stage');
-  stage.innerHTML = s.src
-    ? `<img src="${s.src}" alt="">`
-    : `<div class="demo-slide" style="background:${s.bg}">${s.demo}</div>`;
+  if (s.collage && s.collage.length) {
+    const n = Math.min(s.collage.length, 4);
+    stage.innerHTML =
+      `<span class="collage-badge">▦ ${s.collage.length} photos</span>` +
+      `<div class="collage n${n}">${s.collage.slice(0,4).map(it => mediaTile(it, false)).join('')}</div>`;
+  } else {
+    stage.innerHTML = mediaTile(s, true);
+  }
   document.getElementById('viewer-cap').textContent = s.caption;
-  document.getElementById('viewer-why').textContent = '✨ ' + s.why;
+  document.getElementById('viewer-why').textContent = '✨ ' + (s.why || '');
   document.querySelectorAll('#viewer-dots .dot').forEach((d, i) =>
     d.classList.toggle('on', i === slideIdx));
 }
 
 function goSlide(i)   { slideIdx = i; renderSlide(); }
 function slideStep(d) { slideIdx = (slideIdx + d + slides.length) % slides.length; renderSlide(); }
+
+// ── Interactive map (Leaflet + free OpenStreetMap) ──
+function renderMap(locations) {
+  const section = document.getElementById('map-section');
+  if (!locations || !locations.length || typeof L === 'undefined') {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+  if (chapterMap) { chapterMap.remove(); chapterMap = null; }
+  // Defer so the container has dimensions before Leaflet measures it
+  setTimeout(() => {
+    chapterMap = L.map('chapter-map', { scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap', maxZoom: 18
+    }).addTo(chapterMap);
+    const pts = [];
+    locations.forEach(loc => {
+      if (typeof loc.lat !== 'number' || typeof loc.lng !== 'number') return;
+      L.marker([loc.lat, loc.lng]).addTo(chapterMap).bindPopup(loc.name || '');
+      pts.push([loc.lat, loc.lng]);
+    });
+    if (pts.length === 1) chapterMap.setView(pts[0], 9);
+    else if (pts.length > 1) chapterMap.fitBounds(pts, { padding: [40, 40] });
+    chapterMap.invalidateSize();
+  }, 60);
+}
+
+// ── Editing: title, narrative, captions ───────
+function toggleEdit() {
+  editing = !editing;
+  const viewer = document.getElementById('chapter-viewer');
+  viewer.classList.toggle('editing', editing);
+  const btn = document.getElementById('edit-toggle');
+  btn.textContent = editing ? '✓ Done editing' : '✏️ Edit story';
+  ['viewer-title', 'viewer-narrative', 'viewer-cap'].forEach(id => {
+    document.getElementById(id).setAttribute('contenteditable', editing);
+  });
+  if (editing) stopPlay();
+}
+
+function commitEdit(field, raw) {
+  if (!currentChapter) return;
+  const text = raw.replace(/^[“"]+|[”"]+$/g, '').trim();
+  if (field === 'title')     { currentChapter.title = text; }
+  if (field === 'narrative') { currentChapter.narrative = text; }
+  if (field === 'caption')   { slides[slideIdx].caption = text; currentChapter.slides = slides; }
+}
+
+// Wire up live editing (captions/title/narrative write back to the chapter)
+['viewer-title', 'viewer-narrative', 'viewer-cap'].forEach(id => {
+  document.addEventListener('input', e => {
+    if (e.target.id === id) commitEdit(e.target.dataset.field, e.target.textContent);
+  });
+});
 
 function togglePlay() {
   if (playTimer) return stopPlay();
