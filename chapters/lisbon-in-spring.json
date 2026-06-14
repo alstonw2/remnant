@@ -7,6 +7,11 @@
     { "name": "Cabo da Roca, Portugal", "lat": 38.7805, "lng": -9.4989 },
     { "name": "Sintra, Portugal", "lat": 38.7989, "lng": -9.3883 }
   ],
+  "userPins": [
+    { "id": "pin_demo1", "lat": 38.7267, "lng": -9.1356, "name": "Time Out Market", "note": "Best bifana of the whole trip.", "icon": "🍴" },
+    { "id": "pin_demo2", "lat": 38.7139, "lng": -9.1394, "name": "Miradouro de Santa Luzia", "note": "Sunset over the rooftops.", "icon": "📷" },
+    { "id": "pin_demo3", "lat": 38.7975, "lng": -9.3904, "name": "Quinta da Regaleira", "note": "The spiral well in Sintra.", "icon": "🏛️" }
+  ],
   "slides": [
     { "demo": "🌅", "bg": "linear-gradient(135deg,#E8985E,#C4713A)", "caption": "First morning over the Alfama rooftops.", "why": "Chosen as the opening — it sets the light the whole trip lived in." },
     { "collage": [
