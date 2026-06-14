@@ -1580,6 +1580,13 @@
       <button class="ctrl-btn" onclick="slideStep(1)">→</button>
     </div>
 
+    <div id="reorder-bar" class="hidden" style="text-align:center;margin-top:1rem;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;align-items:center">
+      <span class="text-muted" id="slide-position" style="margin-right:.25rem"></span>
+      <button class="btn-back" id="move-earlier" onclick="moveSlide(-1)">◀ Move earlier</button>
+      <button class="btn-back" id="move-later" onclick="moveSlide(1)">Move later ▶</button>
+      <button class="btn-back" id="make-intro" onclick="makeIntro()">⭐ Make intro</button>
+    </div>
+
     <div style="text-align:center;margin-top:1.25rem">
       <button class="btn-back edit-toggle-btn" onclick="toggleEdit()">✏️ Edit story</button>
     </div>
@@ -2339,11 +2346,11 @@ const DEMO = {
   ],
   slides: [
     { demo: '🌅', bg: 'linear-gradient(135deg,#E8985E,#C4713A)', caption: 'First morning over the Alfama rooftops.', why: 'Chosen as the opening — it sets the light the whole trip lived in.' },
+    { demo: '🚋', bg: 'linear-gradient(135deg,#5E8C7B,#2D4A3E)', caption: 'Tram 28, exactly as crowded as promised.', why: 'A standalone moment — the most retold story of the trip deserves its own slide.' },
     { collage: [
-        { demo: '🚋', bg: 'linear-gradient(135deg,#5E8C7B,#2D4A3E)' },
         { demo: '🏛️', bg: 'linear-gradient(135deg,#7A8C9E,#3D5B6E)' },
         { demo: '🎨', bg: 'linear-gradient(135deg,#C98B6A,#9E5B3A)' }
-      ], caption: 'A morning wandering the tiled hills.', why: 'Three views of the same neighborhood — stronger together than apart.' },
+      ], caption: 'A morning wandering the tiled hills.', why: 'Two views of the same neighborhood — stronger together than apart.' },
     { demo: '🥮', bg: 'linear-gradient(135deg,#D9B36A,#B8953F)', caption: 'Six pastéis de nata. None survived.', why: 'Food photos carry memory — this one had everyone\'s hands in frame.' },
     { demo: '🌊', bg: 'linear-gradient(135deg,#6A93A8,#3D5B6E)', caption: 'Cabo da Roca — the edge of the continent.', why: 'The only photo where everyone is looking at the same horizon.' },
     { demo: '🌙', bg: 'linear-gradient(135deg,#4A4070,#2C2645)', caption: 'Last night, fado drifting up the street.', why: 'A closing image — quieter than the rest, the way trips actually end.' }
@@ -2414,11 +2421,44 @@ function renderSlide() {
   document.getElementById('viewer-why').textContent = '✨ ' + (s.why || '');
   document.querySelectorAll('#viewer-dots .dot').forEach((d, i) =>
     d.classList.toggle('on', i === slideIdx));
+  updateReorderBar();
 }
 
 function rebuildDots() {
   document.getElementById('viewer-dots').innerHTML =
     slides.map((_, i) => `<div class="dot" onclick="goSlide(${i})"></div>`).join('');
+}
+
+// ── Reorder slides (edit mode) ────────────────
+function updateReorderBar() {
+  const pos = document.getElementById('slide-position');
+  if (pos) pos.textContent = `Slide ${slideIdx + 1} of ${slides.length}`;
+  const earlier = document.getElementById('move-earlier');
+  const later   = document.getElementById('move-later');
+  const intro   = document.getElementById('make-intro');
+  if (earlier) earlier.disabled = slideIdx === 0;
+  if (later)   later.disabled   = slideIdx === slides.length - 1;
+  if (intro)   intro.disabled   = slideIdx === 0;
+}
+
+function moveSlide(dir) {
+  const ni = slideIdx + dir;
+  if (ni < 0 || ni >= slides.length) return;
+  [slides[slideIdx], slides[ni]] = [slides[ni], slides[slideIdx]];
+  slideIdx = ni;
+  if (currentChapter) currentChapter.slides = slides;
+  rebuildDots();
+  renderSlide();
+}
+
+function makeIntro() {
+  if (slideIdx === 0) return;
+  const [s] = slides.splice(slideIdx, 1);
+  slides.unshift(s);
+  slideIdx = 0;
+  if (currentChapter) currentChapter.slides = slides;
+  rebuildDots();
+  renderSlide();
 }
 
 // Remove one photo from a collage (edit mode). Collapses to a single slide
@@ -2594,6 +2634,7 @@ function toggleEdit() {
   ['viewer-title', 'viewer-narrative', 'viewer-cap'].forEach(id => {
     document.getElementById(id).setAttribute('contenteditable', editing);
   });
+  document.getElementById('reorder-bar').classList.toggle('hidden', !editing);
   if (editing) stopPlay();
   renderSlide();   // show/hide the per-photo remove buttons on collages
 }
