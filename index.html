@@ -734,26 +734,32 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Collage layout inside the stage */
-    .collage {
-      width: 100%; height: 100%;
-      display: grid;
-      gap: 4px;
+    /* Collage layout — masonry, no cropping (photos shown in full) */
+    .viewer-stage.collage-mode {
+      aspect-ratio: auto;
+      height: auto;
+      display: block;
       padding: 4px;
-      background: var(--green);
     }
-    .collage.n2 { grid-template-columns: 1fr 1fr; }
-    .collage.n3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
-    .collage.n3 :first-child { grid-row: span 2; }
-    .collage.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-    .collage > div, .collage > img {
-      width: 100%; height: 100%;
-      object-fit: cover;
+    .collage {
+      column-gap: 4px;
+      columns: 2;
+      width: 100%;
+    }
+    .collage.many { columns: 2; }
+    @media (min-width: 620px) { .collage.many { columns: 3; } }
+    .collage > * {
+      width: 100%;
+      margin: 0 0 4px;
+      break-inside: avoid;
       border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.5rem;
       overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
     }
+    .collage img { width: 100%; height: auto; display: block; }   /* natural aspect = no crop */
+    .collage .demo-tile { aspect-ratio: var(--ar, 1); }
+    .collage > .wide { column-span: all; }                        /* panoramas get a full row */
     .collage-badge {
       position: absolute;
       top: .75rem; left: .75rem;
@@ -1466,6 +1472,15 @@
         <label>What was this chapter? <span class="label-hint">helps the AI find the story</span></label>
         <input type="text" id="chapter-context" placeholder='e.g. "Our family trip to Lisbon, spring 2026"' />
       </div>
+      <div class="form-row">
+        <label>Story tone <span class="label-hint">how the captions and narrative are written</span></label>
+        <select id="tone-select">
+          <option value="warm">Warm &amp; reflective (default)</option>
+          <option value="playful">Playful &amp; light</option>
+          <option value="poetic">Poetic &amp; literary</option>
+          <option value="plain">Plain &amp; factual</option>
+        </select>
+      </div>
       <div class="key-row">
         <input type="text" id="api-key" placeholder="Your Anthropic API key (stays in your browser)" />
         <span class="cost-pill" id="cost-estimate">~$0.00</span>
@@ -1489,7 +1504,7 @@
         <div class="step-eyebrow" id="viewer-eyebrow">Chapter</div>
         <h2 class="step-title" id="viewer-title" data-field="title"></h2>
       </div>
-      <button class="btn-back" id="edit-toggle" onclick="toggleEdit()">✏️ Edit story</button>
+      <button class="btn-back edit-toggle-btn" id="edit-toggle" onclick="toggleEdit()">✏️ Edit story</button>
     </div>
     <div class="edit-hint">✏️ Edit mode on — click the title, story, or any caption to rewrite it. Changes are saved when you export.</div>
 
@@ -1507,10 +1522,18 @@
       <button class="ctrl-btn" onclick="slideStep(1)">→</button>
     </div>
 
+    <div style="text-align:center;margin-top:1.25rem">
+      <button class="btn-back edit-toggle-btn" onclick="toggleEdit()">✏️ Edit story</button>
+    </div>
+
     <div class="chapter-narrative" id="viewer-narrative" data-field="narrative"></div>
 
     <div id="map-section" class="hidden">
-      <div class="map-label">📍 Where this chapter took place</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+        <div class="map-label">📍 Where this chapter took place</div>
+        <button class="btn-back" id="add-pin-btn" onclick="toggleAddPin()">＋ Add a place</button>
+      </div>
+      <p class="text-muted hidden" id="add-pin-hint" style="margin:0 0 .5rem">Click anywhere on the map to drop a pin — name the spot and add a detail to remember (a restaurant, a viewpoint, where it happened).</p>
       <div class="chapter-map" id="chapter-map"></div>
     </div>
 
@@ -2061,7 +2084,7 @@ async function loadSavedChapters() {
         </div>`;
       card.onclick = () => {
         slides = c.slides;
-        showChapter(c.title, c.narrative, c.eyebrow || 'Saved chapter', c.locations || []);
+        showChapter(c.title, c.narrative, c.eyebrow || 'Saved chapter', c.locations || [], c.userPins || []);
       };
       list.appendChild(card);
     }
@@ -2100,8 +2123,8 @@ async function handleFiles(files) {
   const grid = document.getElementById('thumb-grid');
   grid.innerHTML = '';
   for (const file of list) {
-    const dataUrl = await downscale(file);
-    chapterPhotos.push({ dataUrl, base64: dataUrl.split(',')[1] });
+    const { dataUrl, ar } = await downscale(file);
+    chapterPhotos.push({ dataUrl, base64: dataUrl.split(',')[1], ar });
     const img = document.createElement('img');
     img.src = dataUrl;
     grid.appendChild(img);
@@ -2119,7 +2142,7 @@ function downscale(file) {
       canvas.height = Math.round(img.height * scale);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(img.src);
-      resolve(canvas.toDataURL('image/jpeg', 0.72));
+      resolve({ dataUrl: canvas.toDataURL('image/jpeg', 0.72), ar: img.width / img.height });
     };
     img.src = URL.createObjectURL(file);
   });
@@ -2147,14 +2170,23 @@ async function runCuration() {
   btn.innerHTML = '<span class="spinner"></span>Curating…';
 
   const context = document.getElementById('chapter-context').value.trim() || 'A chapter of someone\'s life';
+  const TONES = {
+    warm:   'Write in a warm, reflective, intimate memoir voice — nostalgic but restrained, never saccharine.',
+    playful:'Write in a playful, light, upbeat voice with a gentle sense of humor.',
+    poetic: 'Write in a poetic, lyrical, literary voice — vivid imagery, careful rhythm.',
+    plain:  'Write in a plain, factual, understated voice — minimal sentiment, let the moments speak.'
+  };
+  const tone = document.getElementById('tone-select')?.value || 'warm';
   const content = [{
     type: 'text',
     text: `You are the photo curator for Remnant, a legacy product that turns camera rolls into life chapters. Context from the user: "${context}".
 
+VOICE: ${TONES[tone]}
+
 Below are ${chapterPhotos.length} photos, numbered 0 to ${chapterPhotos.length - 1} in order. Build a story of 5–8 slides that best TELL THE STORY of this chapter — favor emotional and narrative value over technical quality, skip near-duplicates, and order them so they read as a story.
 
 Each slide is either:
-- a SINGLE hero photo (use for the most powerful, standalone moments), or
+- a SINGLE hero photo (use for the most powerful, standalone moments, and for wide/panoramic shots that deserve full width), or
 - a COLLAGE of 2–4 related photos (use for clusters that belong together — a meal, a group of friends, several views of one place).
 Mix the two: aim for at least one collage if the photos support it, but never force it.
 
@@ -2186,7 +2218,7 @@ Respond with ONLY valid JSON, no markdown fences:
     const data = await res.json();
     const text = data.content.map(b => b.text || '').join('');
     const parsed = JSON.parse(text.replace(/^```json?\s*|\s*```$/g, ''));
-    const photoAt = i => chapterPhotos[i] ? { src: chapterPhotos[i].dataUrl } : null;
+    const photoAt = i => chapterPhotos[i] ? { src: chapterPhotos[i].dataUrl, ar: chapterPhotos[i].ar } : null;
     slides = (parsed.slides || parsed.selections || []).map(s => {
       if (s.type === 'collage' && Array.isArray(s.indices)) {
         const items = s.indices.map(photoAt).filter(Boolean);
@@ -2240,10 +2272,10 @@ function loadDemo() {
 // ── Viewer ────────────────────────────────────
 let chapterMap = null, editing = false;
 
-function showChapter(title, narrative, eyebrow, locations = []) {
+function showChapter(title, narrative, eyebrow, locations = [], userPins = []) {
   stopPlay();
   if (editing) toggleEdit();
-  currentChapter = { title, narrative, eyebrow, locations, slides };
+  currentChapter = { title, narrative, eyebrow, locations, userPins, slides };
   document.getElementById('chapter-setup').style.display = 'none';
   document.getElementById('chapter-viewer').style.display = 'block';
   document.getElementById('viewer-eyebrow').textContent = eyebrow;
@@ -2262,19 +2294,29 @@ function showChapter(title, narrative, eyebrow, locations = []) {
 
 function mediaTile(item, single) {
   if (item.video) return `<video src="${item.video}" ${single ? 'controls' : 'muted loop'} style="width:100%;height:100%;object-fit:cover"></video>`;
-  if (item.src)   return single ? `<img src="${item.src}" alt="">` : `<img src="${item.src}" alt="">`;
+  if (item.src)   return `<img src="${item.src}" alt="">`;
   return `<div class="${single ? 'demo-slide' : ''}" style="background:${item.bg}">${item.demo || ''}</div>`;
+}
+
+// A collage tile: photos shown in full (no crop); wide shots span the row.
+function collageTile(item) {
+  const wide = item.ar && item.ar >= 1.5 ? ' wide' : '';
+  if (item.video) return `<video class="wide" src="${item.video}" muted loop></video>`;
+  if (item.src)   return `<img class="${wide.trim()}" src="${item.src}" alt="">`;
+  return `<div class="demo-tile${wide}" style="background:${item.bg};--ar:${item.ar || 1}">${item.demo || ''}</div>`;
 }
 
 function renderSlide() {
   const s = slides[slideIdx];
   const stage = document.getElementById('viewer-stage');
   if (s.collage && s.collage.length) {
-    const n = Math.min(s.collage.length, 4);
+    stage.classList.add('collage-mode');
+    const cls = s.collage.length >= 3 ? 'many' : 'few';
     stage.innerHTML =
       `<span class="collage-badge">▦ ${s.collage.length} photos</span>` +
-      `<div class="collage n${n}">${s.collage.slice(0,4).map(it => mediaTile(it, false)).join('')}</div>`;
+      `<div class="collage ${cls}">${s.collage.map(collageTile).join('')}</div>`;
   } else {
+    stage.classList.remove('collage-mode');
     stage.innerHTML = mediaTile(s, true);
   }
   document.getElementById('viewer-cap').textContent = s.caption;
@@ -2287,9 +2329,20 @@ function goSlide(i)   { slideIdx = i; renderSlide(); }
 function slideStep(d) { slideIdx = (slideIdx + d + slides.length) % slides.length; renderSlide(); }
 
 // ── Interactive map (Leaflet + free OpenStreetMap) ──
+let addPinMode = false;
+
+function pinIcon(emoji) {
+  return L.divIcon({
+    className: 'user-pin',
+    html: `<div style="font-size:1.6rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">${emoji}</div>`,
+    iconSize: [28, 28], iconAnchor: [14, 26], popupAnchor: [0, -24]
+  });
+}
+
 function renderMap(locations) {
   const section = document.getElementById('map-section');
-  if (!locations || !locations.length || typeof L === 'undefined') {
+  const pins = (currentChapter && currentChapter.userPins) || [];
+  if (typeof L === 'undefined' || (!locations.length && !pins.length)) {
     section.classList.add('hidden');
     return;
   }
@@ -2307,10 +2360,38 @@ function renderMap(locations) {
       L.marker([loc.lat, loc.lng]).addTo(chapterMap).bindPopup(loc.name || '');
       pts.push([loc.lat, loc.lng]);
     });
-    if (pts.length === 1) chapterMap.setView(pts[0], 9);
+    pins.forEach(p => { drawUserPin(p); pts.push([p.lat, p.lng]); });
+    if (pts.length === 1) chapterMap.setView(pts[0], 12);
     else if (pts.length > 1) chapterMap.fitBounds(pts, { padding: [40, 40] });
+    chapterMap.on('click', onMapClick);
     chapterMap.invalidateSize();
   }, 60);
+}
+
+function drawUserPin(p) {
+  L.marker([p.lat, p.lng], { icon: pinIcon('📌') })
+    .addTo(chapterMap)
+    .bindPopup(`<strong>${p.name || 'A place'}</strong>${p.note ? '<br>' + p.note : ''}`);
+}
+
+function toggleAddPin() {
+  addPinMode = !addPinMode;
+  const btn = document.getElementById('add-pin-btn');
+  btn.textContent = addPinMode ? '✓ Done adding' : '＋ Add a place';
+  document.getElementById('add-pin-hint').classList.toggle('hidden', !addPinMode);
+  const c = document.getElementById('chapter-map');
+  if (c) c.style.cursor = addPinMode ? 'crosshair' : '';
+}
+
+function onMapClick(e) {
+  if (!addPinMode) return;
+  const name = prompt('Name this place (e.g. "Tartine Bakery", "the lookout"):');
+  if (!name) return;
+  const note = prompt('A little detail to remember? (optional)') || '';
+  const pin = { lat: e.latlng.lat, lng: e.latlng.lng, name, note };
+  if (!currentChapter.userPins) currentChapter.userPins = [];
+  currentChapter.userPins.push(pin);
+  drawUserPin(pin);
 }
 
 // ── Editing: title, narrative, captions ───────
@@ -2318,8 +2399,9 @@ function toggleEdit() {
   editing = !editing;
   const viewer = document.getElementById('chapter-viewer');
   viewer.classList.toggle('editing', editing);
-  const btn = document.getElementById('edit-toggle');
-  btn.textContent = editing ? '✓ Done editing' : '✏️ Edit story';
+  document.querySelectorAll('.edit-toggle-btn').forEach(btn => {
+    btn.textContent = editing ? '✓ Done editing' : '✏️ Edit story';
+  });
   ['viewer-title', 'viewer-narrative', 'viewer-cap'].forEach(id => {
     document.getElementById(id).setAttribute('contenteditable', editing);
   });
