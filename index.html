@@ -633,7 +633,21 @@
       object-fit: cover;
       border-radius: 10px;
       border: 1px solid rgba(0,0,0,.08);
+      display: block;
     }
+    .thumb { position: relative; }
+    .thumb.starred img { border-color: var(--terra); box-shadow: 0 0 0 2px var(--terra); }
+    .star-btn {
+      position: absolute;
+      top: 5px; right: 5px;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(0,0,0,.45);
+      border: none; cursor: pointer;
+      color: #fff; font-size: .85rem; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .star-btn.on { background: var(--terra); }
     .key-row {
       display: flex;
       gap: .75rem;
@@ -1522,7 +1536,11 @@
       <input type="file" id="photo-input" accept="image/*" multiple class="hidden" onchange="handleFiles(this.files)" />
     </div>
 
+    <p class="text-muted hidden" id="star-hint" style="margin-top:1rem">
+      ☆ Tap the star on any photo to <strong>highlight</strong> it — starred photos are always included in the chapter, ideally as their own hero slide.
+    </p>
     <div class="thumb-grid" id="thumb-grid"></div>
+    <p class="text-terra" id="star-count" style="font-weight:600;font-size:.85rem;margin-top:.5rem"></p>
 
     <div class="form-section" style="margin-top:1.5rem">
       <div class="form-section-title">Curate with AI</div>
@@ -2200,12 +2218,38 @@ async function handleFiles(files) {
   grid.innerHTML = '';
   for (const file of list) {
     const { dataUrl, ar } = await downscale(file);
-    chapterPhotos.push({ dataUrl, base64: dataUrl.split(',')[1], ar });
-    const img = document.createElement('img');
-    img.src = dataUrl;
-    grid.appendChild(img);
+    const idx = chapterPhotos.length;
+    chapterPhotos.push({ dataUrl, base64: dataUrl.split(',')[1], ar, starred: false });
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb';
+    wrap.id = `thumb-${idx}`;
+    wrap.innerHTML =
+      `<img src="${dataUrl}" alt="">` +
+      `<button class="star-btn" title="Star to highlight in this chapter" onclick="toggleStar(${idx})">☆</button>`;
+    grid.appendChild(wrap);
   }
+  document.getElementById('star-hint').classList.toggle('hidden', list.length === 0);
+  updateStarCount();
   updateCostEstimate();
+}
+
+// Star = "must include, ideally as a hero slide" (set before curation).
+function toggleStar(idx) {
+  const p = chapterPhotos[idx];
+  if (!p) return;
+  p.starred = !p.starred;
+  const wrap = document.getElementById(`thumb-${idx}`);
+  wrap.classList.toggle('starred', p.starred);
+  const btn = wrap.querySelector('.star-btn');
+  btn.classList.toggle('on', p.starred);
+  btn.textContent = p.starred ? '★' : '☆';
+  updateStarCount();
+}
+
+function updateStarCount() {
+  const n = chapterPhotos.filter(p => p.starred).length;
+  const el = document.getElementById('star-count');
+  if (el) el.textContent = n ? `★ ${n} starred — these will be prioritized` : '';
 }
 
 function downscale(file) {
@@ -2253,13 +2297,17 @@ async function runCuration() {
     plain:  'Write in a plain, factual, understated voice — minimal sentiment, let the moments speak.'
   };
   const tone = document.getElementById('tone-select')?.value || 'warm';
+  const starred = chapterPhotos.map((p, i) => p.starred ? i : -1).filter(i => i >= 0);
+  const starLine = starred.length
+    ? `\n\nSTARRED PHOTOS (the user marked these as must-haves): [${starred.join(', ')}]. You MUST include every starred photo in the chapter. Give each its own SINGLE hero slide unless two starred photos clearly belong together as a pair.`
+    : '';
   const content = [{
     type: 'text',
     text: `You are the photo curator for Remnant, a legacy product that turns camera rolls into life chapters. Context from the user: "${context}".
 
 VOICE: ${TONES[tone]}
 
-Below are ${chapterPhotos.length} photos, numbered 0 to ${chapterPhotos.length - 1} in order. Build a story of 5–8 slides that best TELL THE STORY of this chapter — favor emotional and narrative value over technical quality, skip near-duplicates, and order them so they read as a story.
+Below are ${chapterPhotos.length} photos, numbered 0 to ${chapterPhotos.length - 1} in order. Build a story of 5–8 slides that best TELL THE STORY of this chapter — favor emotional and narrative value over technical quality, skip near-duplicates, and order them so they read as a story.${starLine}
 
 Each slide is either:
 - a SINGLE hero photo (use for the most powerful, standalone moments, and ALWAYS for wide/panoramic shots so they show in full), or
