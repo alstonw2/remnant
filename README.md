@@ -15,8 +15,11 @@ how you want to be remembered.
 4. Legacy messages, including time-locked letters delivered at life milestones
 
 **Chapters — AI photo stories** — upload photos from a trip or season of life;
-Claude analyzes them, selects the handful that best tell the story, and writes
-the narrative connecting them. Presented as an interactive, playable slideshow.
+star the ones you want highlighted, then Claude selects the handful that best
+tell the story and writes the narrative connecting them. Presented as an
+interactive, playable slideshow with collage slides, an interactive map of
+where it happened, and full inline editing (rewrite text, reorder slides,
+drop your own map pins).
 
 ## Architecture
 
@@ -42,5 +45,19 @@ python3 -m http.server 3000
 2. Click "Export chapter (.json)"
 3. Drop the file into `chapters/`
 4. Add its filename to `chapters/manifest.json`
+
+## Deploy (as a subpage on alstonwang.com)
+
+`index.html` is the single source of truth. `remnant.html` is the deployable
+subpage, generated from it — never edit `remnant.html` directly.
+
+```bash
+./build.sh                       # regenerates remnant.html from index.html
+```
+
+Then upload `remnant.html` + the `chapters/` folder to your web root (Network
+Solutions File Manager / FTP). The page goes live at `/remnant.html`; link to
+it from your homepage. The `chapters/` folder powers the example gallery — omit
+it and the gallery simply hides itself.
 
 > "Death ends a life, not a relationship."
