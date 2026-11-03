@@ -28,6 +28,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-20 | Every experience carries a learning, styled unlike the AI's reasoning | Settled |
 | T-21 | Coverage gaps are shown, not hidden | Settled |
 | T-22 | One life map, filtered by the scrubber | Settled |
+| T-23 | The entry opens beside the timeline, not below it | Settled |
 | T-14 | Surface what the model *declined* to promote | Settled |
 | T-15 | Voice lookup fails closed | Settled |
 
@@ -372,5 +373,27 @@ then scattering outward across five trips, is the migration story told without a
 hand-placed in a table keyed by photo caption, which means a new trip silently has no pins until someone
 adds its coordinates. And the map needs network tiles, so it is the one part of the page that fails
 visibly offline.
-**Revisit when:** A chapter is added and nobody notices it missing from the map. The coordinate table should
-probably be derived from photo EXIF instead.
+**Revisit when:** A chapter is added and nobody notices it missing from the map. EXIF was the obvious fix and
+it does not work here — sampling three of the site's photographs (an iPhone shot, a Fujifilm shot, one from
+Guatemala) found EXIF present but the GPS block stripped from every one. EXIF would improve the *dates*,
+which `photos.json` gets wrong in places, but coordinates have to stay hand-placed.
+
+
+## T-23 · The entry opens beside the timeline, not below it
+**Status:** Settled · v0.8
+
+**Chose:** Above 900px the explorer is two columns — the timeline on the left, a sticky panel on the right
+that fills with whatever you clicked. Clicking scrolls nothing. Below 900px it stacks and the panel scrolls
+into view as before.
+**Over:** One column with the detail rendered underneath, which is what it was.
+**Because:** Reading a life means moving through it quickly, and a layout that jumps the page on every click
+punishes exactly that. Side by side, the timeline stays put and the panel changes — so the photograph is the
+thing that moves, not the page. It also gives photographs somewhere to be big: in the old single column they
+were 92px thumbnails next to text, and the whole claim of the product is that you can see what a life
+consisted of.
+**Costs:** Two layouts to keep working, and the sticky panel has its own scroll for long chapters, which
+means a scroll container inside a scroll container — always slightly awkward with a trackpad. The rail also
+needs explicit affordances it did not need before (a chevron, a hint line, a marked-open state), because a
+row that changes something elsewhere on screen is less obviously clickable than one that expands in place.
+**Revisit when:** Someone misses that the panel changed. If that happens the panel needs a transition, not a
+bigger hint.
