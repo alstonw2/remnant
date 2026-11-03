@@ -6,4 +6,4 @@ set -e
 cd "$(dirname "$0")"
 cp index.html remnant.html
 echo "✓ remnant.html regenerated from index.html"
-echo "  Upload remnant.html + the chapters/ folder to your web root."
+echo "  Run ./deploy.sh to publish, or upload remnant.html + chapters/ by hand."

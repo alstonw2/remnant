@@ -1,0 +1,664 @@
+{
+  "_comment": "The demo life. Swap this file for your own and the explorer re-renders — nothing in index.html is hardcoded to Rosa. Keep the shape; every field is optional except person.name and events[].year.",
+  "demo": true,
+  "person": {
+    "name": "Rosa Imelda Fuentes",
+    "shortName": "Rosa",
+    "born": 1951,
+    "living": true,
+    "hometown": "Harlingen, Texas",
+    "tagline": "Seamstress. Organizer. Kept every bent needle she ever broke.",
+    "thin": {
+      "_comment": "What survives without Remnant. Deliberately sparse.",
+      "line": "Rosa I. Fuentes · 1951–",
+      "artifacts": [
+        "4 photos on a phone, undated",
+        "A Facebook account nobody can log into",
+        "An address book in a drawer",
+        "Her name, spelled wrong, on a program"
+      ]
+    }
+  },
+  "eras": [
+    {
+      "id": "harlingen",
+      "label": "Before the bus",
+      "from": 1951,
+      "to": 1969,
+      "place": "Harlingen, Texas",
+      "note": "Eighteen years in one house on Van Buren, four blocks from the irrigation canal.",
+      "why": "Grouped as one era because almost nothing in the record changes: one address, one school, one church. The density picks up sharply in 1969, which is usually where a life actually starts for the person telling it.",
+      "learning": {
+        "kind": "reflection",
+        "at": "2021",
+        "text": "I thought leaving was the brave thing. Staying would have been brave too, and I did not understand that until my own children started leaving."
+      }
+    },
+    {
+      "id": "division",
+      "label": "Division Street",
+      "from": 1969,
+      "to": 1983,
+      "place": "Chicago, Illinois",
+      "note": "Fourteen years at Kaplan Garment on Division. Met Efraín in the stairwell in 1972.",
+      "why": "These years cluster around a single workplace, but the emotional center moves twice — work, then marriage, then the walkout. Split into three and each piece loses the thread; kept whole, it reads as the decade that formed her.",
+      "learning": {
+        "kind": "advice",
+        "at": "2020",
+        "text": "Learn the thing nobody else on the floor wants to learn. Mine was the ventilation code, and it turned out to be the whole lever."
+      }
+    },
+    {
+      "id": "shop",
+      "label": "Fuentes Alterations",
+      "from": 1984,
+      "to": 2011,
+      "place": "18th Street, Pilsen",
+      "note": "Twenty-seven years, one storefront, two sewing machines.",
+      "why": "The longest and least eventful stretch, and the one most likely to be compressed into a sentence by anyone summarizing her. Kept as its own era precisely because the ordinariness is the point.",
+      "learning": {
+        "kind": "reflection",
+        "at": "2022",
+        "text": "Nothing happened for twenty-seven years. That is what a good stretch of life looks like from inside — you only notice it was the main part once it stops."
+      }
+    },
+    {
+      "id": "after",
+      "label": "After Efraín",
+      "from": 2011,
+      "to": null,
+      "place": "Pilsen, then Berwyn",
+      "note": "Sold the shop in 2014. Started writing things down in 2018.",
+      "why": "Marked as a new era by a death rather than a move or a job. The photo record thins out by roughly two thirds after 2011 and the written record begins — that inversion is the clearest signal in the whole dataset.",
+      "learning": {
+        "kind": "forward",
+        "at": "2023",
+        "text": "Write it down while it is boring to you. The things I almost did not bother recording are the ones Yolanda reads twice."
+      }
+    }
+  ],
+  "events": [
+    {
+      "year": 1951,
+      "kind": "milestone",
+      "title": "Born in Harlingen",
+      "detail": "Second of five. Delivered at home by her aunt Chavela.",
+      "era": "harlingen"
+    },
+    {
+      "year": 1963,
+      "kind": "photo",
+      "title": "First communion",
+      "detail": "The only surviving photograph of her mother smiling.",
+      "demo": "🕊",
+      "bg": "linear-gradient(135deg,#C9B89A,#9E8862)",
+      "era": "harlingen"
+    },
+    {
+      "year": 1966,
+      "kind": "milestone",
+      "title": "Learned to sew",
+      "detail": "On her mother's treadle Singer, hemming her sisters' uniforms for a nickel.",
+      "era": "harlingen"
+    },
+    {
+      "year": 1969,
+      "kind": "milestone",
+      "title": "The bus to Chicago",
+      "detail": "Thirty-two hours. Arrived with one suitcase and a coat borrowed from Chavela.",
+      "era": "division"
+    },
+    {
+      "year": 1969,
+      "kind": "achievement",
+      "ref": "a-kaplan",
+      "era": "division"
+    },
+    {
+      "year": 1972,
+      "kind": "photo",
+      "title": "The stairwell",
+      "detail": "Efraín fixing the freight elevator. She said he was showing off. He was.",
+      "demo": "🔧",
+      "bg": "linear-gradient(135deg,#7A8C9E,#3D5B6E)",
+      "era": "division"
+    },
+    {
+      "year": 1974,
+      "kind": "milestone",
+      "title": "Married Efraín Vargas",
+      "detail": "City hall on a Tuesday. Twelve dollars and a witness they found in the hallway.",
+      "era": "division"
+    },
+    {
+      "year": 1976,
+      "kind": "milestone",
+      "title": "Yolanda born",
+      "era": "division"
+    },
+    {
+      "year": 1977,
+      "kind": "chapter",
+      "ref": "the-walkout",
+      "era": "division"
+    },
+    {
+      "year": 1977,
+      "kind": "achievement",
+      "ref": "a-walkout",
+      "era": "division"
+    },
+    {
+      "year": 1979,
+      "kind": "milestone",
+      "title": "Daniel born",
+      "era": "division"
+    },
+    {
+      "year": 1982,
+      "kind": "milestone",
+      "title": "Marcos born",
+      "era": "division"
+    },
+    {
+      "year": 1984,
+      "kind": "chapter",
+      "ref": "opening-day",
+      "era": "shop"
+    },
+    {
+      "year": 1984,
+      "kind": "achievement",
+      "ref": "a-shop",
+      "era": "shop"
+    },
+    {
+      "year": 1991,
+      "kind": "photo",
+      "title": "The General arrives",
+      "detail": "A 1962 Singer 251 bought at auction for $40. Named by Marcos, age nine.",
+      "demo": "🧵",
+      "bg": "linear-gradient(135deg,#C98B6A,#9E5B3A)",
+      "era": "shop"
+    },
+    {
+      "year": 1996,
+      "kind": "tradition",
+      "ref": "t-tamales",
+      "era": "shop"
+    },
+    {
+      "year": 2003,
+      "kind": "photo",
+      "title": "Yolanda's wedding, the alterations",
+      "detail": "She took the dress in four times. Nobody else was allowed to touch it.",
+      "demo": "👰",
+      "bg": "linear-gradient(135deg,#D9B36A,#B8953F)",
+      "era": "shop"
+    },
+    {
+      "year": 2011,
+      "kind": "milestone",
+      "title": "Efraín died",
+      "detail": "March. Thirty-seven years married.",
+      "era": "after"
+    },
+    {
+      "year": 2014,
+      "kind": "milestone",
+      "title": "Sold the shop",
+      "detail": "Kept The General. It is in the spare room.",
+      "era": "after"
+    },
+    {
+      "year": 2018,
+      "kind": "letter",
+      "ref": "l-danny",
+      "era": "after"
+    },
+    {
+      "year": 2019,
+      "kind": "chapter",
+      "ref": "lisbon-in-spring",
+      "era": "after"
+    },
+    {
+      "year": 2021,
+      "kind": "letter",
+      "ref": "l-marisol",
+      "era": "after"
+    },
+    {
+      "year": 2023,
+      "kind": "letter",
+      "ref": "l-yolanda",
+      "era": "after"
+    },
+    {
+      "year": 2024,
+      "kind": "achievement",
+      "ref": "a-needles",
+      "era": "after"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "a-kaplan",
+      "year": 1969,
+      "title": "Hired at Kaplan Garment",
+      "detail": "Section 4, sleeves. $1.60 an hour.",
+      "included": true,
+      "why": "A first job is usually a résumé line, not a defining moment. Included because every later thing in the record traces back through this room — the walkout, Efraín, the skill she sold for forty years.",
+      "learning": {
+        "kind": "advice",
+        "at": "1969",
+        "text": "Take the job in the room where things are decided, even if your part of the room is sleeves."
+      }
+    },
+    {
+      "id": "a-walkout",
+      "year": 1977,
+      "title": "Organized the Division Street walkout",
+      "detail": "Eleven days. Won the ventilation, lost the wage demand.",
+      "included": true,
+      "why": "The only entry she describes in two places using different words, which usually means it mattered more than she says. Included at the top of the era for that reason, not because it is the most public thing she did.",
+      "learning": {
+        "kind": "forward",
+        "at": "1977",
+        "text": "If you are the one who notices it is wrong, you are already the one. Waiting for somebody better to speak is how nothing happens for another ten years."
+      }
+    },
+    {
+      "id": "a-shop",
+      "year": 1984,
+      "title": "Opened Fuentes Alterations",
+      "detail": "Storefront on 18th. Rent was $210.",
+      "included": true,
+      "why": "Included, but ranked below the walkout. Starting a business reads as the bigger achievement from outside; in her own account the shop is described in logistics and the walkout in feeling.",
+      "learning": {
+        "kind": "reflection",
+        "at": "1984",
+        "text": "Owning it was mostly paperwork and a bad door. The part I am proud of is that for twenty-seven years people in this neighborhood had somewhere to go when a thing tore."
+      }
+    },
+    {
+      "id": "a-chamber",
+      "year": 1998,
+      "title": "Pilsen Chamber of Commerce — Small Business of the Year",
+      "detail": "Plaque. Still in the box.",
+      "included": false,
+      "why": "Left out of the surfaced list. It is the most award-shaped item in the record and the only one she never mentions again. Kept in the archive, not promoted — an honor nobody brings up twice is documentation, not a defining moment.",
+      "learning": {
+        "kind": "reflection",
+        "at": "1998",
+        "text": "They gave me a plaque for the year I nearly closed. I have never known what to do with that."
+      }
+    },
+    {
+      "id": "a-needles",
+      "year": 2024,
+      "title": "The jar",
+      "detail": "Fifty-five years of broken and bent needles in a Sanka coffee jar. She has never thrown one away.",
+      "included": true,
+      "why": "Not an achievement by any outside definition, and the strongest candidate in the file. Flagged because it appears in three separate entries written years apart, each time without explanation — the kind of detail a family tells and an obituary never contains.",
+      "learning": {
+        "kind": "forward",
+        "at": "2024",
+        "text": "Keep the broken ones. Every needle in that jar snapped on something I was trying to do properly, and a life of only the finished work is not an honest account of it."
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "id": "the-walkout",
+      "year": 1977,
+      "title": "Eleven Days",
+      "eyebrow": "Chapter · 1977",
+      "narrative": "It started over a broken fan in August and it ended with a fan. In between, eleven days on the sidewalk on Division, and a photograph somebody's cousin took that she kept in a drawer for forty years without showing anyone.",
+      "curationWhy": "Nine candidate photographs, four chosen. Weighted toward the ones with other people's faces in them: she is the subject of this chapter but not the story of it, and the images where she stands alone read as portraits of a person rather than an account of a thing that happened.",
+      "locations": [
+        {
+          "name": "Division & Ashland, Chicago",
+          "lat": 41.9033,
+          "lng": -87.6677
+        }
+      ],
+      "candidates": 9,
+      "slides": [
+        {
+          "demo": "🪧",
+          "bg": "linear-gradient(135deg,#C4571A,#8E3C10)",
+          "caption": "Day one. The sign is Yolanda's posterboard from school.",
+          "why": "Opens here because the handmade sign dates and places the whole chapter in one frame — no caption needed to know this was improvised."
+        },
+        {
+          "demo": "☕",
+          "bg": "linear-gradient(135deg,#9E8862,#6E5B3F)",
+          "caption": "Day four. Somebody's mother brought coffee every morning at six.",
+          "why": "The least dramatic photo in the set and the one chosen over two better-composed shots of the picket line. Strikes are remembered as confrontation; this is what eleven days actually looked like."
+        },
+        {
+          "collage": [
+            {
+              "demo": "🧥",
+              "bg": "linear-gradient(135deg,#5E8C7B,#2D4A3E)"
+            },
+            {
+              "demo": "🌧",
+              "bg": "linear-gradient(135deg,#7A8C9E,#3D5B6E)"
+            }
+          ],
+          "caption": "Day seven, and the rain that nearly ended it.",
+          "why": "Paired rather than given separate slides — neither is strong alone, and together they carry the one stretch the narrative describes as nearly losing."
+        },
+        {
+          "demo": "🌬",
+          "bg": "linear-gradient(135deg,#C9B89A,#9E8862)",
+          "caption": "The fan, installed the following spring.",
+          "why": "Closes on the object rather than the people. The demand that was won was the small one, and ending here states that without the narrative having to."
+        }
+      ],
+      "learning": {
+        "kind": "reflection",
+        "at": "1977",
+        "text": "Eleven days and we won the fan, not the wages. For years I called that losing. It was not losing. Forty people found out they could stop the line, and two of them ran the union after me."
+      }
+    },
+    {
+      "id": "opening-day",
+      "year": 1984,
+      "title": "Opening Day on 18th Street",
+      "eyebrow": "Chapter · 1984",
+      "narrative": "Two machines, a rented storefront with a bad door, and a hand-lettered sign Efraín painted twice because the first one was crooked. Eleven customers the first week. Nine of them neighbors.",
+      "curationWhy": "Only six candidates exist for this chapter, so selection mattered less than sequence. Ordered to end on the empty shop rather than the full one — the record of this day in her own words is about being terrified, and a triumphant ending would contradict the text it sits next to.",
+      "locations": [
+        {
+          "name": "18th Street, Pilsen, Chicago",
+          "lat": 41.8573,
+          "lng": -87.6563
+        }
+      ],
+      "candidates": 6,
+      "slides": [
+        {
+          "demo": "🪟",
+          "bg": "linear-gradient(135deg,#D9B36A,#B8953F)",
+          "caption": "The sign, second attempt.",
+          "why": "Chosen over a straighter photo of the same sign because Efraín's hand is in the frame."
+        },
+        {
+          "demo": "✂️",
+          "bg": "linear-gradient(135deg,#C98B6A,#9E5B3A)",
+          "caption": "First customer: a hem on a funeral suit, two dollars.",
+          "why": "The caption carries this one, not the image. Selected because the detail survives in her writing and the photo gives it a place to live."
+        },
+        {
+          "demo": "🌙",
+          "bg": "linear-gradient(135deg,#4A4070,#2C2645)",
+          "caption": "Closing up, the first night.",
+          "why": "Ends the chapter on an empty room. Deliberate — see the curation note."
+        }
+      ],
+      "learning": {
+        "kind": "advice",
+        "at": "1984",
+        "text": "I was so frightened that first night I counted the money three times. If I could tell myself one thing it would be that the fear never does go away, and that it is not a signal to stop — it is just the price of the door being yours."
+      }
+    },
+    {
+      "id": "lisbon-in-spring",
+      "year": 2019,
+      "title": "Lisbon, in Spring",
+      "eyebrow": "Chapter · 2019 · with Yolanda",
+      "narrative": "We came for the pastéis and stayed for the light. Somewhere between the tram bells and the tiled hills, four days became the kind of memory a family retells for decades.",
+      "curationWhy": "Thirty-one candidates, six chosen — the highest cull rate in the archive, because a holiday generates the most photographs and the fewest distinct moments. Prioritized frames with more than one person in them; a trip taken by two people and remembered by one is a different chapter.",
+      "locations": [
+        {
+          "name": "Lisbon, Portugal",
+          "lat": 38.7223,
+          "lng": -9.1393
+        },
+        {
+          "name": "Cabo da Roca, Portugal",
+          "lat": 38.7805,
+          "lng": -9.4989
+        },
+        {
+          "name": "Sintra, Portugal",
+          "lat": 38.7989,
+          "lng": -9.3883
+        }
+      ],
+      "userPins": [
+        {
+          "id": "pin_demo1",
+          "lat": 38.7267,
+          "lng": -9.1356,
+          "name": "Time Out Market",
+          "note": "Best bifana of the whole trip.",
+          "icon": "🍴"
+        },
+        {
+          "id": "pin_demo2",
+          "lat": 38.7139,
+          "lng": -9.1394,
+          "name": "Miradouro de Santa Luzia",
+          "note": "Sunset over the rooftops.",
+          "icon": "📷"
+        },
+        {
+          "id": "pin_demo3",
+          "lat": 38.7975,
+          "lng": -9.3904,
+          "name": "Quinta da Regaleira",
+          "note": "The spiral well in Sintra.",
+          "icon": "🏛️"
+        }
+      ],
+      "candidates": 31,
+      "slides": [
+        {
+          "demo": "🌅",
+          "bg": "linear-gradient(135deg,#E8985E,#C4713A)",
+          "caption": "First morning over the Alfama rooftops.",
+          "why": "Chosen as the opening — it sets the light the whole trip lived in."
+        },
+        {
+          "demo": "🚋",
+          "bg": "linear-gradient(135deg,#5E8C7B,#2D4A3E)",
+          "caption": "Tram 28, exactly as crowded as promised.",
+          "why": "A standalone moment — the most retold story of the trip deserves its own slide."
+        },
+        {
+          "collage": [
+            {
+              "demo": "🏛️",
+              "bg": "linear-gradient(135deg,#7A8C9E,#3D5B6E)"
+            },
+            {
+              "demo": "🎨",
+              "bg": "linear-gradient(135deg,#C98B6A,#9E5B3A)"
+            }
+          ],
+          "caption": "A morning wandering the tiled hills.",
+          "why": "Two views of the same neighborhood — stronger together than apart."
+        },
+        {
+          "demo": "🥮",
+          "bg": "linear-gradient(135deg,#D9B36A,#B8953F)",
+          "caption": "Six pastéis de nata. None survived.",
+          "why": "Food photos carry memory — this one had everyone's hands in frame."
+        },
+        {
+          "demo": "🌊",
+          "bg": "linear-gradient(135deg,#6A93A8,#3D5B6E)",
+          "caption": "Cabo da Roca — the edge of the continent.",
+          "why": "The only photo where everyone is looking at the same horizon."
+        },
+        {
+          "demo": "🌙",
+          "bg": "linear-gradient(135deg,#4A4070,#2C2645)",
+          "caption": "Last night, fado drifting up the street.",
+          "why": "A closing image — quieter than the rest, the way trips actually end."
+        }
+      ],
+      "learning": {
+        "kind": "forward",
+        "at": "2019",
+        "text": "Go somewhere with your mother while she can still climb the hill. I waited until I was sixty-eight to take a trip like this. The hill was the whole point and I nearly did not get it."
+      }
+    }
+  ],
+  "letters": [
+    {
+      "id": "l-danny",
+      "to": "Daniel",
+      "relation": "my son",
+      "written": 2018,
+      "trigger": {
+        "type": "",
+        "value": ""
+      },
+      "revisions": 11,
+      "lastTouched": 2026,
+      "body": "You were nineteen and I said the thing about your father and I have never once been able to take it back, because you left the next morning and by the time you came home we had both decided to pretend it was a small thing.\n\nIt was not a small thing. I knew it was not a small thing while I was saying it.",
+      "nudge": "Eleven revisions over eight years, no delivery condition set, last opened six weeks ago. The longest-running unsent item in the archive.",
+      "nudgeWhy": "Surfaced above the other two not because it is the most recent but because of the shape of the edit history: eleven revisions and never a recipient trigger. Letters that get written once and scheduled are finished. Letters that get rewritten and never scheduled are usually still being decided.",
+      "learning": {
+        "kind": "reflection",
+        "at": "2026",
+        "text": "Eight years is a long time to edit a thing you have not sent. I know what that means. I am not ready to know it yet."
+      }
+    },
+    {
+      "id": "l-marisol",
+      "to": "Marisol",
+      "relation": "my granddaughter",
+      "written": 2021,
+      "trigger": {
+        "type": "milestone",
+        "value": "On her wedding day"
+      },
+      "revisions": 2,
+      "lastTouched": 2024,
+      "body": "Your great-grandmother hemmed her own wedding dress the night before, by hand, because the machine broke and she would not ask anyone. I want you to know that we come from women who finish things.\n\nAlso: let somebody help you. Both of these are true.",
+      "nudge": "Scheduled, twice revised, settled.",
+      "nudgeWhy": "Not surfaced for action. Included in the view as the counterexample — this is what a finished letter looks like, and the contrast is what makes the unsent one legible.",
+      "learning": {
+        "kind": "advice",
+        "at": "2021",
+        "text": "Finish what you start, and let people help you finish it. I only ever learned the first half."
+      }
+    },
+    {
+      "id": "l-yolanda",
+      "to": "Yolanda",
+      "relation": "my daughter",
+      "written": 2023,
+      "trigger": {
+        "type": "recurring",
+        "value": "On my birthday each year"
+      },
+      "revisions": 4,
+      "lastTouched": 2026,
+      "body": "You will want to do something on this day and you will not know what. Here is permission to do nothing.\n\nIf you do want something: the tamales. You know the masa is supposed to be too much. That is not a mistake in the recipe, it is extra for the children, and your grandmother did it on purpose, and now you know.",
+      "nudge": "Recurring. Next delivery in 4 months.",
+      "nudgeWhy": "Low priority for nudging — a recurring trigger means the letter has a job and is doing it. Surfaced only to show the third trigger type.",
+      "learning": {
+        "kind": "forward",
+        "at": "2023",
+        "text": "Grief does not want to be useful. Let the day be whatever it is."
+      }
+    }
+  ],
+  "traditions": [
+    {
+      "id": "t-tamales",
+      "name": "Christmas tamales",
+      "when": "December 23rd, always, starting at six in the morning",
+      "desc": "Masa made the night before. Three generations at one table, assembly line, nobody allowed to use a spoon for the spreading — it has to be the back of your hand. The radio is on and it is always the same station.",
+      "why": "The masa is deliberately over-portioned. Her mother did it so there would be extra for the children to eat raw while they worked, and no one in the family knew that until she wrote it down in 2023.",
+      "keeper": "Yolanda, who already makes it without asking how",
+      "learning": {
+        "kind": "forward",
+        "at": "2023",
+        "text": "Make too much masa. Somebody is always hungrier than they will say."
+      }
+    }
+  ],
+  "voice": {
+    "_comment": "Retrieval only. Answers quote what she actually wrote, with the date. No generation in her voice, ever.",
+    "quotes": [
+      {
+        "at": "2018-04-11",
+        "source": "Letter to Daniel, revision 3",
+        "topics": [
+          "regret",
+          "anger",
+          "apology",
+          "daniel",
+          "fight"
+        ],
+        "text": "I knew it was not a small thing while I was saying it."
+      },
+      {
+        "at": "2019-09-02",
+        "source": "Your Story — the hardest thing",
+        "topics": [
+          "fear",
+          "money",
+          "hard",
+          "afraid",
+          "struggle"
+        ],
+        "text": "We were never poor in a way anyone could see. That was the work — making sure nobody could see it. I was tired for about thirty years."
+      },
+      {
+        "at": "2021-06-14",
+        "source": "Letter to Marisol",
+        "topics": [
+          "marriage",
+          "women",
+          "family",
+          "wedding",
+          "help"
+        ],
+        "text": "We come from women who finish things. Also: let somebody help you. Both of these are true."
+      },
+      {
+        "at": "2023-12-23",
+        "source": "Traditions — Christmas tamales",
+        "topics": [
+          "tamales",
+          "christmas",
+          "recipe",
+          "mother",
+          "food"
+        ],
+        "text": "The masa is supposed to be too much. That is not a mistake in the recipe."
+      },
+      {
+        "at": "2024-02-08",
+        "source": "Values — in your own words",
+        "topics": [
+          "work",
+          "pride",
+          "sewing",
+          "needles",
+          "craft"
+        ],
+        "text": "Anybody can sew a straight line. The whole job is the part where you take it apart again."
+      }
+    ],
+    "noAnswer": {
+      "examples": [
+        "what she thought of my husband",
+        "politics",
+        "whether she was happy",
+        "god",
+        "her father"
+      ],
+      "why": "She never wrote about this. The archive returns nothing rather than inferring an answer from adjacent material — a plausible reconstruction of what someone would have said is the one output this product will not produce."
+    }
+  }
+}

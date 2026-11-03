@@ -8,7 +8,33 @@ how you want to be remembered.
 
 ## Features
 
-**Guided life profile** — a 4-step flow covering:
+**The explorer** — the page opens on a complete life you can explore immediately, with no
+input and no API key: a draggable timeline across four eras, chapters, letters with their
+delivery conditions, traditions, and the moments in between. Every decision the AI made is
+shown with its reasoning and can be overruled — which frames it kept and why, which
+achievements it promoted, which it deliberately left in the archive, and why a question
+about the person returns nothing when they never wrote about it.
+
+The whole demo life is `demo/life.json`. Swap that one file for your own record and the
+explorer re-renders; nothing about the demo person is hardcoded in `index.html`.
+
+A single **life map** sits above the timeline holding every place in the record, filtered
+by the same scrubber — drag to 2009 and only the places that existed by then remain. Pins
+open their entry.
+
+Every experience carries a **learning** — advice to a younger self, a reflection, or
+something for whoever comes after. These render in the person's own voice, visually
+distinct from the model's reasoning; they are indexed by the voice lookup and weighted
+when the model ranks defining moments.
+
+Era grouping and achievement ranking are real inference, not authored copy. The file ships
+with cached reasoning so the page works with no API key; "Re-derive with AI" runs the call
+live and the provenance line says which you are looking at. That call uses Sonnet rather
+than the Haiku used for photo curation — see `docs/TRADEOFFS.md` T-16.
+
+**Guided life profile** — a 4-step flow covering medical directives, traditions and legacy
+messages. No longer part of the demo flow (T-17); still built, still works, reachable at
+`/remnant.html#plan`:
 1. The basics & cultural identity
 2. Care preferences (living will, medical power of attorney, after-death wishes)
 3. Family traditions & heritage worth preserving
@@ -30,14 +56,21 @@ drop your own map pins).
 - One batched API request per chapter (~$0.04 for 30 photos)
 - Saved example chapters are static JSON in `chapters/` — visitors view them at
   zero API cost
-- Profile data persists in localStorage; no accounts, no tracking
+- Profile data persists in localStorage (`remnant_v2`); no accounts, no tracking
+- Letters and traditions are *entries* — `{ to, trigger, fields, revisions }` — and
+  every reflective field keeps append-only revision history, one version per
+  editing session. See `docs/TRADEOFFS.md` (T-01 to T-06) for why.
 
 ## Run locally
 
 ```bash
-python3 -m http.server 3000
+/usr/bin/python3 -m http.server 3000
 # open http://localhost:3000
 ```
+
+Use the absolute path: on Apple Silicon a Homebrew or python.org `python3` earlier
+in `PATH` may be x86-only and fail to spawn with "Bad CPU type in executable".
+`/usr/bin/python3` ships universal.
 
 ## Adding a saved chapter
 
@@ -55,9 +88,28 @@ subpage, generated from it — never edit `remnant.html` directly.
 ./build.sh                       # regenerates remnant.html from index.html
 ```
 
-Then upload `remnant.html` + the `chapters/` folder to your web root (Network
-Solutions File Manager / FTP). The page goes live at `/remnant.html`; link to
-it from your homepage. The `chapters/` folder powers the example gallery — omit
-it and the gallery simply hides itself.
+Or publish in one step — `deploy.sh` rebuilds, copies `remnant.html` + `chapters/`
+into the site repo on a temporary detached worktree, and pushes. GitHub Pages
+redeploys in about a minute.
+
+```bash
+./deploy.sh --dry-run   # show exactly what would change, commit and push nothing
+./deploy.sh             # publish
+```
+
+It finds the site repo at `$REMNANT_SITE_REPO`, else `~/alstonwang.github.io`,
+else `~/Documents/GitHub/alstonwang.github.io`. Clone it first if missing:
+
+```bash
+gh repo clone alstonw2/alstonwang.github.io ~/alstonwang.github.io
+```
+
+Keep both checkouts outside `~/Documents` — sandboxed helper processes (the local
+preview server among them) cannot read that directory on macOS, which shows up as
+an unexplained 404 on every file.
+
+The page goes live at `/remnant.html`; link to it from your homepage. The
+`chapters/` folder powers the example gallery — omit it and the gallery simply
+hides itself.
 
 > "Death ends a life, not a relationship."
