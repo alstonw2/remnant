@@ -58,49 +58,9 @@ IMG_BASE = "https://alstonwang.com/images/"
 
 # Caption prefixes that belong to one trip, and the chapter they form.
 # Everything not claimed here stays a standalone dated photograph.
-# Caption → real-world place. Chapter maps are built from this, so adding a
-# coordinate here is all it takes for a trip to appear on the life map.
-PLACES = {
-    "Santa Cruz, Guatemala": (14.7333, -91.2000),
-    "San Pedro, Guatemala": (14.6919, -91.2722),
-    "Volcan de Fuego, Guatemala": (14.4747, -90.8806),
-    "Acatenango, Guatemala": (14.5008, -90.8761),
-    "Antigua, Guatemala": (14.5586, -90.7295),
-    "Pistol River": (42.2787, -124.3976),
-    "Secret Beach": (42.1830, -124.3730),
-    "Samuel H. Boardman": (42.1500, -124.3500),
-    "Samuel H. Boardman Scenic": (42.1500, -124.3500),
-    "Devil's Punchbowl": (44.7457, -124.0618),
-    "Thor's Well, Oregon Coast": (44.2780, -124.1130),
-    "Shingle Mills, Oregon Coast": (42.2000, -124.3500),
-    "Cannon Beach": (45.8918, -123.9615),
-    "Crater Lake": (42.9446, -122.1090),
-    "Glacier National Park": (48.7596, -113.7870),
-    "Grinnell Glacier, Glacier": (48.7563, -113.7236),
-    "Japan": (35.6762, 139.6503),
-    "Taipei": (25.0330, 121.5654),
-    "Costa Rica": (9.7489, -83.7534),
-    "Arenal Volcano, Costa Rica": (10.4630, -84.7033),
-    "La Fortuna, Costa Rica": (10.4678, -84.6427),
-    "La Paz Waterfall, Costa Rica": (10.2167, -84.1667),
-}
-
-CHAPTERS = [
-    ("guatemala", "Guatemala", 2025,
-     ["Santa Cruz, Guatemala", "San Pedro, Guatemala", "Volcan de Fuego, Guatemala",
-      "Acatenango, Guatemala", "Antigua, Guatemala"]),
-    ("oregon-coast", "The Oregon Coast", 2026,
-     ["Pistol River", "Secret Beach", "Samuel H. Boardman", "Samuel H. Boardman Scenic",
-      "Devil's Punchbowl", "Thor's Well, Oregon Coast", "Shingle Mills, Oregon Coast",
-      "Cannon Beach", "Crater Lake", "Moonlight"]),
-    ("glacier", "Glacier National Park", 2024,
-     ["Glacier National Park", "Grinnell Glacier, Glacier"]),
-    ("asia", "Japan and Taiwan", 2025,
-     ["Japan", "Taipei"]),
-    ("costa-rica", "Costa Rica", 2025,
-     ["Costa Rica", "Arenal Volcano, Costa Rica", "La Fortuna, Costa Rica",
-      "La Paz Waterfall, Costa Rica"]),
-]
+# Chapter definitions and place coordinates live in the scaffold file, not here —
+# they are content the author edits constantly, and content does not belong in
+# code. See "chapterDefs" and "places" in demo/alston.scaffold.json.
 
 
 def youtube_id(url):
@@ -369,43 +329,85 @@ def apply_curated(record, curated):
                 ch[field] = c[field]
 
 
-def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    flags = {a for a in sys.argv[1:] if a.startswith("--")}
-    src_path, out_path = args[0], args[1]
-    here = os.path.dirname(os.path.abspath(__file__))
-    photos = json.load(open(src_path))
-
-    claimed = {cap for _, _, _, caps in CHAPTERS for cap in caps}
-    by_caption = defaultdict(list)
+def list_photos(photos):
+    """Print every caption with its count and date span, so chapter definitions
+    can be written against what actually exists."""
+    groups = defaultdict(list)
     for p in photos:
-        by_caption[p.get("caption") or ""].append(p)
+        groups[p.get("caption") or "(no caption)"].append(p.get("date") or "")
+    rows = sorted(groups.items(), key=lambda kv: min([d for d in kv[1] if d] or ["~"]))
+    width = max([len(c) for c, _ in rows] + [7])
+    print("%-*s %4s  %s" % (width, "CAPTION", "N", "DATES"))
+    for cap, dates in rows:
+        got = sorted(d for d in dates if d)
+        span = "undated" if not got else got[0] + (" → " + got[-1] if got[0] != got[-1] else "")
+        # Never truncate: these strings get copied into chapterDefs verbatim.
+        print("%-*s %4d  %s" % (width, cap, len(dates), span))
+    print("\n%d captions, %d photos" % (len(rows), len(photos)))
 
-    chapters = []
-    for cid, title, year, caps in CHAPTERS:
+
+def chapters_from_defs(defs, by_caption, photos, places):
+    """Build chapters from the scaffold. A chapter selects its photographs by
+    caption, by date range, or both."""
+    chapters, claimed = [], set()
+    for d in defs:
+        caps = list(d.get("captions") or [])
+        claimed.update(caps)
         shots = [p for cap in caps for p in by_caption.get(cap, [])]
+        rng = d.get("dates") or {}
+        if rng.get("from") and rng.get("to"):
+            for p in photos:
+                if p.get("date") and rng["from"] <= p["date"] <= rng["to"] and p not in shots:
+                    shots.append(p)
+                    claimed.add(p.get("caption") or "")
         shots = [p for p in shots if p.get("date")]
+        if not shots:
+            print("  ! %s: no photos matched, skipping" % d.get("id"))
+            continue
         # Videos last — they read as a coda rather than an opening frame.
         shots.sort(key=lambda p: (p.get("type") == "video", p["date"]))
-        if not shots:
-            continue
+        year = d.get("year") or int(shots[0]["date"][:4])
+        seen, locations = [], []
+        for p in shots:
+            cap = p.get("caption")
+            if cap in places and cap not in seen:
+                seen.append(cap)
+                locations.append({"name": cap, "lat": places[cap][0], "lng": places[cap][1]})
         chapters.append({
-            "id": cid,
+            "id": d["id"],
             "year": year,
-            "title": title,
+            "title": d.get("title", d["id"]),
             "eyebrow": "Chapter · %s" % year,
             "narrative": "",          # written by curation, not here
             "curationWhy": "",        # derived, not authored
             "candidates": len(shots),
-            "locations": [
-                {"name": cap, "lat": PLACES[cap][0], "lng": PLACES[cap][1]}
-                for cap in caps if cap in PLACES
-            ],
-            "slides": [
-                dict(media_for(p), caption=p.get("caption", ""), why="")
-                for p in shots
-            ],
+            "locations": locations,
+            "slides": [dict(media_for(p), caption=p.get("caption", ""), why="")
+                       for p in shots],
         })
+    return chapters, claimed
+
+
+def main():
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    src_path = args[0]
+    here = os.path.dirname(os.path.abspath(__file__))
+    photos = json.load(open(src_path))
+
+    if "--list-photos" in flags:
+        list_photos(photos)
+        return
+
+    out_path = args[1]
+    scaffold = json.load(open(args[2])) if len(args) > 2 else {}
+
+    by_caption = defaultdict(list)
+    for p in photos:
+        by_caption[p.get("caption") or ""].append(p)
+
+    chapters, claimed = chapters_from_defs(
+        scaffold.get("chapterDefs", []), by_caption, photos, scaffold.get("places", {}))
 
     # Dated photographs that aren't part of a chapter become timeline moments.
     loose = []
@@ -429,9 +431,8 @@ def main():
             "title": cap,
             "detail": "",
         }, **media_for(p)))
-    for cid, _, year, _ in CHAPTERS:
-        if any(c["id"] == cid for c in chapters):
-            events.append({"year": year, "kind": "chapter", "ref": cid})
+    for ch in chapters:
+        events.append({"year": ch["year"], "kind": "chapter", "ref": ch["id"]})
 
     out = {
         "_generated": "demo/build-life.py — chapters and photo moments from photos.json",
@@ -442,9 +443,11 @@ def main():
     # Merge the hand-written half over the generated one. The scaffold owns the
     # person, achievements, letters and quotes; this script owns anything that
     # can be read out of the photo archive.
-    if len(args) > 2:
-        scaffold = json.load(open(args[2]))
+    if scaffold:
+        scaffold = dict(scaffold)
         events = events + scaffold.pop("scaffoldEvents", [])
+        scaffold.pop("chapterDefs", None)
+        scaffold.pop("places", None)
         scaffold.pop("chapters", None)
         # Learnings are keyed by id so they survive regeneration — the photos
         # can change without losing what the experience taught.
@@ -472,6 +475,15 @@ def main():
     else:
         curated = None
     if curated:
+        # A chapter deleted from the scaffold leaves its curated output behind;
+        # drop it so a deleted chapter stays deleted.
+        live = {c["id"] for c in out.get("chapters", [])}
+        stale = [k for k in curated if not k.startswith("_") and k not in live]
+        for k in stale:
+            del curated[k]
+        if stale:
+            json.dump(curated, open(curated_path, "w"), indent=2, ensure_ascii=False)
+            print("  pruned curation for removed chapter(s): %s" % ", ".join(stale))
         apply_curated(out, curated)
 
     derived_path = out_path.replace(".json", ".derived.json")

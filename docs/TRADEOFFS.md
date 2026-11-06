@@ -31,6 +31,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-23 | The entry opens beside the timeline, not below it | Settled |
 | T-24 | Derived reasoning is baked into the record, from one shared prompt | Settled |
 | T-25 | Curation runs from the CLI against the published photographs | Settled |
+| T-26 | Chapters are defined in the scaffold, not in code | Settled |
 | T-14 | Surface what the model *declined* to promote | Settled |
 | T-15 | Voice lookup fails closed | Settled |
 
@@ -442,3 +443,26 @@ Pillow is not installed on the system python. And curation overwrites captions, 
 a chapter is lost on the next run — only the chapter's `learning` is protected.
 **Revisit when:** Captions get hand-edited and then clobbered. At that point curated output needs to merge
 rather than replace, or hand-edits need their own layer.
+
+
+## T-26 · Chapters are defined in the scaffold, not in code
+**Status:** Settled · v0.11
+
+**Chose:** `chapterDefs` and `places` move out of `build-life.py` and into `demo/alston.scaffold.json`. A
+chapter selects its photographs by caption list, by date range, or both. Deleting a chapter means deleting
+its entry, and its curated output is pruned automatically on the next build.
+**Over:** Leaving them as Python constants, which is where they started because the first version was a
+one-off migration script.
+**Because:** Chapters are content, and content the author edits every week does not belong in code. Adding a
+trip should not mean opening a `.py` file and matching a tuple's shape.
+**Costs:** Chapter ids are now only validated at build time — a typo in `learnings` or a `captions` entry
+that matches nothing fails quietly, printing a skip line that is easy to miss in a long build. The date-range
+form is also greedy: it claims every photograph in the window, so two trips in one week need caption lists
+instead.
+**Also:** the move surfaced a real bug. Two `places` keys had been written from a truncated terminal display
+— `"Grinnell Glacier, Glacier"` and `"Samuel H. Boardman Scenic"` — and matched no caption at all, so two
+photographs were silently dropped from their chapters while two map pins were fabricated for captions that
+do not exist. The caption-driven rebuild exposed both. `--list-photos` now prints captions at full width for
+exactly this reason.
+**Revisit when:** A typo'd id costs real time. The build should validate ids against the record and fail
+loudly rather than skip.
