@@ -33,6 +33,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-25 | Curation runs from the CLI against the published photographs | Settled |
 | T-26 | Chapters are defined in the scaffold, not in code | Settled |
 | T-27 | Curation carries a fingerprint of what it saw | Settled |
+| T-28 | Every entry states whether it has a place | Settled |
 | T-14 | Surface what the model *declined* to promote | Settled |
 | T-15 | Voice lookup fails closed | Settled |
 
@@ -486,3 +487,21 @@ photograph replaced at the same URL. It also marks a chapter stale when slides a
 technically right and will read as a false alarm to whoever did the editing.
 **Revisit when:** Photographs start being replaced in place rather than added. Then the hash needs to cover
 content, not URLs.
+
+
+## T-28 · Every entry states whether it has a place
+**Status:** Settled · v0.13
+
+**Chose:** A pill under every timeline entry naming its place, or saying "No location" when there is none.
+Tagged ones take you to the pin — scrubbing the year forward first if the pin does not exist yet at the
+current position, then centring, opening the popup and flashing the marker.
+**Over:** Showing the pill only where a place exists, which is the tidier design.
+**Because:** The absence is information. A record of a life should be able to say "this happened somewhere
+and I have not said where" — and on the authoring side it turns the timeline into a worklist, the same role
+the coverage strip plays for years. Hiding the empty state would make an untagged entry indistinguishable
+from one nobody has looked at.
+**Costs:** Thirty-eight of fifty-five entries currently say "No location", which is a lot of visual noise
+for an absence, and it will stay noisy until most are tagged. The button also moves the scrubber as a side
+effect, which is the right behaviour but is the only control on the page that changes two things at once.
+**Revisit when:** Most entries are tagged. At that point the empty pill has done its job and could be
+dropped, or shown only while authoring.
