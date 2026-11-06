@@ -13,14 +13,22 @@ Everything a person has to supply themselves — letters, traditions, what they
 actually said — stays in the hand-written section of the output file and is
 merged over whatever this produces.
 
-    ./demo/build-life.py photos.json demo/alston.json [scaffold.json] [--derive]
+    ./demo/build-life.py photos.json demo/alston.json [scaffold.json] [--derive] [--curate [ids...]]
 
 --derive additionally asks Claude to group the years into eras and rank the
 candidate defining moments, writing the answer to <output>.derived.json. That
 file is merged back in on every subsequent build, so the reasoning survives
 regenerating the photo half and the published page ships with it — a visitor
 without an API key still sees real derived reasoning rather than an empty
-state. Needs ANTHROPIC_API_KEY in the environment.
+state.
+
+--curate sends each chapter's photographs (downscaled to 768px, cached locally)
+to the vision model, which picks the handful that tell the story, writes their
+captions and says why it chose each. The answer goes to <output>.curated.json
+and is merged on every later build, same as --derive. Pass chapter ids after
+the scaffold to curate only those.
+
+Both need ANTHROPIC_API_KEY in the environment.
 """
 import json
 import os
@@ -34,8 +42,15 @@ from collections import defaultdict
 # the high-volume perceptual photo curation, which runs on Haiku. See
 # docs/TRADEOFFS.md T-16.
 REASONER = "claude-sonnet-5-5"
+# Curation is perceptual and high-volume — dozens of images per chapter — so it
+# stays on the cheap vision model, the same one the in-browser flow uses.
+CURATOR = "claude-haiku-4-5-20251001"
 API_URL = "https://api.anthropic.com/v1/messages"
-PROMPT_FILE = "derive-prompt.txt"   # shared with index.html — one source of truth
+PROMPT_FILE = "derive-prompt.txt"    # shared with index.html — one source of truth
+CURATE_PROMPT_FILE = "curate-prompt.txt"
+CURATE_TONE = ("Write in a warm, reflective, intimate memoir voice — nostalgic but "
+               "restrained, never saccharine.")
+MAX_EDGE = 768                       # downscale before upload, as the browser does
 
 # Absolute, so the record renders the same whether it is served from the site,
 # from a local dev server, or from someone else's machine.
@@ -224,6 +239,136 @@ def apply_derived(record, derived):
         record["_provenance"] = derived["_provenance"]
 
 
+def call_claude(model, content, max_tokens, key):
+    body = json.dumps({"model": model, "max_tokens": max_tokens,
+                       "messages": [{"role": "user", "content": content}]}).encode()
+    req = urllib.request.Request(API_URL, data=body, headers={
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=300) as r:
+            data = json.load(r)
+    except urllib.error.HTTPError as e:
+        raise SystemExit("API error %s: %s" % (e.code, e.read().decode("utf-8", "replace")[:300]))
+    text = "".join(b.get("text", "") for b in data.get("content", []))
+    text = text.strip().removeprefix("```json").removeprefix("```").removesuffix("```")
+    try:
+        return json.loads(text), data.get("usage", {})
+    except json.JSONDecodeError:
+        raise SystemExit("Model did not return valid JSON:\n" + text[:400])
+
+
+def fetch_downscaled(url, cache_dir):
+    """Download once, downscale with sips, return base64 JPEG.
+
+    Photos go out at 768px like the browser flow does — full-resolution uploads
+    would cost several times more and the model gains nothing from them.
+    """
+    import base64, hashlib, subprocess
+    os.makedirs(cache_dir, exist_ok=True)
+    stem = hashlib.sha1(url.encode()).hexdigest()[:16]
+    small = os.path.join(cache_dir, stem + ".jpg")
+    if not os.path.exists(small):
+        raw = os.path.join(cache_dir, stem + ".orig")
+        if not os.path.exists(raw):
+            urllib.request.urlretrieve(url, raw)
+        # sips ships with macOS; Pillow is not installed on the system python.
+        subprocess.run(["sips", "-Z", str(MAX_EDGE), "-s", "format", "jpeg",
+                        raw, "--out", small],
+                       check=True, capture_output=True)
+    return base64.b64encode(open(small, "rb").read()).decode()
+
+
+def curate(record, here, out_path, only_ids):
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not key:
+        sys.exit("--curate needs ANTHROPIC_API_KEY in the environment.")
+
+    template = open(os.path.join(here, CURATE_PROMPT_FILE), encoding="utf-8").read()
+    cache_dir = os.path.join(here, ".photo-cache")
+    path = out_path.replace(".json", ".curated.json")
+    curated = json.load(open(path)) if os.path.exists(path) else {}
+
+    for ch in record.get("chapters", []):
+        if only_ids and ch["id"] not in only_ids:
+            continue
+        # Videos cannot go to a vision model; they are kept as a closing coda.
+        stills = [s for s in ch["slides"] if s.get("src") and not s.get("video")]
+        videos = [s for s in ch["slides"] if s.get("video")]
+        if len(stills) < 3:
+            print("  %s: only %d stills, skipping" % (ch["id"], len(stills)))
+            continue
+
+        print("  %s: downscaling %d photos ..." % (ch["id"], len(stills)))
+        content = [{"type": "text", "text": template
+                    .replace("{CONTEXT}", "%s, %s" % (ch.get("title", ""), ch.get("year", "")))
+                    .replace("{TONE}", CURATE_TONE)
+                    .replace("{COUNT}", str(len(stills)))
+                    .replace("{MAX_INDEX}", str(len(stills) - 1))
+                    .replace("{STARS}", "")}]
+        for i, s in enumerate(stills):
+            content.append({"type": "text", "text": "Photo %d:" % i})
+            content.append({"type": "image", "source": {
+                "type": "base64", "media_type": "image/jpeg",
+                "data": fetch_downscaled(s["src"], cache_dir)}})
+
+        print("  %s: asking %s ..." % (ch["id"], CURATOR))
+        parsed, usage = call_claude(CURATOR, content, 2000, key)
+
+        def at(i):
+            return stills[i] if 0 <= i < len(stills) else None
+
+        slides = []
+        for sl in parsed.get("slides", []):
+            if sl.get("type") == "collage" and isinstance(sl.get("indices"), list):
+                items = [{"src": at(i)["src"]} for i in sl["indices"] if at(i)]
+                if items:
+                    slides.append({"collage": items, "caption": sl.get("caption", ""),
+                                   "why": sl.get("why", "")})
+            else:
+                src = at(sl.get("index"))
+                if src:
+                    slides.append({"src": src["src"], "caption": sl.get("caption", ""),
+                                   "why": sl.get("why", "")})
+        slides.extend(videos)
+
+        curated[ch["id"]] = {
+            "title": parsed.get("title") or ch.get("title"),
+            "narrative": parsed.get("narrative", ""),
+            "curationWhy": "%d of %d photographs kept. Chosen for narrative value over "
+                           "technical quality, near-duplicates dropped." % (len(slides), len(stills)),
+            "slides": slides,
+            "candidates": len(stills),
+            "_usage": usage,
+        }
+        print("  %s: %d of %d kept (%s in / %s out)" % (
+            ch["id"], len(slides), len(stills),
+            usage.get("input_tokens"), usage.get("output_tokens")))
+
+    curated["_provenance"] = {
+        "model": CURATOR,
+        "at": __import__("datetime").datetime.now().isoformat(timespec="seconds"),
+    }
+    json.dump(curated, open(path, "w"), indent=2, ensure_ascii=False)
+    print("  wrote %s" % path)
+    return curated
+
+
+def apply_curated(record, curated):
+    """Replace only what the curator produced. The chapter's learning is the
+    person's own and is never overwritten; locations stay hand-placed, since
+    the PLACES table is more accurate than inferred coordinates."""
+    for ch in record.get("chapters", []):
+        c = curated.get(ch["id"])
+        if not c:
+            continue
+        for field in ("title", "narrative", "curationWhy", "slides", "candidates"):
+            if c.get(field):
+                ch[field] = c[field]
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     flags = {a for a in sys.argv[1:] if a.startswith("--")}
@@ -317,6 +462,18 @@ def main():
 
     # Reasoning persists across rebuilds: regenerate the photo half as often as
     # you like without losing what the model concluded.
+    curated_path = out_path.replace(".json", ".curated.json")
+    curate_flags = [f for f in flags if f.startswith("--curate")]
+    if curate_flags:
+        only = args[3:] if len(args) > 3 else []
+        curated = curate(out, here, out_path, only)
+    elif os.path.exists(curated_path):
+        curated = json.load(open(curated_path))
+    else:
+        curated = None
+    if curated:
+        apply_curated(out, curated)
+
     derived_path = out_path.replace(".json", ".derived.json")
     if "--derive" in flags:
         derived = derive(out, here, out_path)
@@ -328,8 +485,10 @@ def main():
         apply_derived(out, derived)
 
     json.dump(out, open(out_path, "w"), indent=2, ensure_ascii=False)
-    print("%s: %d chapters, %d photo moments%s" % (
+    curated_n = sum(1 for c in out.get("chapters", []) if c.get("curationWhy"))
+    print("%s: %d chapters, %d photo moments%s%s" % (
         out_path, len(chapters), len(events),
+        ", %d curated" % curated_n if curated_n else "",
         ", %d eras derived" % len(out.get("eras", [])) if derived else ""))
 
 

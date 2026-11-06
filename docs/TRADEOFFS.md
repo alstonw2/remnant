@@ -30,6 +30,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-22 | One life map, filtered by the scrubber | Settled |
 | T-23 | The entry opens beside the timeline, not below it | Settled |
 | T-24 | Derived reasoning is baked into the record, from one shared prompt | Settled |
+| T-25 | Curation runs from the CLI against the published photographs | Settled |
 | T-14 | Surface what the model *declined* to promote | Settled |
 | T-15 | Voice lookup fails closed | Settled |
 
@@ -419,3 +420,25 @@ changed underneath it. The prompt file is also fetched at runtime by the browser
 more thing that can 404.
 **Revisit when:** The record changes often enough that stale reasoning misleads. The fix is a content hash
 in `_provenance` and a "derived against an older record" warning, not re-deriving on every load.
+
+
+## T-25 · Curation runs from the CLI against the published photographs
+**Status:** Settled · v0.10
+
+**Chose:** `build-life.py --curate [ids]` downloads each chapter's photographs, downscales them to 768px
+with `sips`, caches them, and sends one batched vision call per chapter. The result lands in
+`<record>.curated.json` and merges on every later build, the same shape as `--derive`. The prompt moves to
+`demo/curate-prompt.txt`, shared with the in-browser flow.
+**Over:** Leaving curation to the browser upload flow, which is where it already worked.
+**Because:** The browser flow curates photos you are uploading now. The record's chapters are built from an
+archive already published on the site, so there was nothing to upload and the chapters shipped uncurated —
+"13 of 13 photographs kept", four consecutive frames captioned "Acatenango, Guatemala", and no per-frame
+reasoning on the one page built to show per-frame reasoning. This closes the last gap between what the page
+claims and what it does.
+**Costs:** Two code paths now produce chapters, and only the prompt is shared — the CLI has no concept of
+starred photos or tone, so those placeholders are filled with defaults and that divergence is invisible
+until someone wonders why a CLI chapter reads differently. It also depends on `sips`, which is macOS-only;
+Pillow is not installed on the system python. And curation overwrites captions, so anything hand-edited in
+a chapter is lost on the next run — only the chapter's `learning` is protected.
+**Revisit when:** Captions get hand-edited and then clobbered. At that point curated output needs to merge
+rather than replace, or hand-edits need their own layer.

@@ -35,6 +35,16 @@ export ANTHROPIC_API_KEY=sk-...
 ./demo/build-life.py photos.json demo/alston.json demo/alston.scaffold.json --derive
 ```
 
+Curate the chapters the same way — this picks which photographs survive, writes their
+captions, and says why each was chosen:
+
+```bash
+./demo/build-life.py photos.json demo/alston.json demo/alston.scaffold.json --curate
+```
+
+Add chapter ids after the scaffold to curate only those (`--curate guatemala glacier`).
+Photos are downscaled to 768px and cached in `demo/.photo-cache`, so re-runs are cheap.
+
 That writes `demo/alston.derived.json`, which every later build merges back in — so the
 photo half can be regenerated without losing the reasoning. The page shows the model and
 date it was derived, and the "Re-derive with AI" button still runs it live for anyone with

@@ -10,3 +10,4 @@ Thumbs.db
 
 # Local tooling
 .claude/settings.local.json
+.photo-cache/
