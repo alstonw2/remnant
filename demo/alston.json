@@ -613,6 +613,11 @@
         "name": "Stuyvesant High School, Manhattan",
         "lat": 40.7179,
         "lng": -74.0135
+      },
+      "date": "June 2017",
+      "media": {
+        "src": "demo/media/graduation-2017.webp",
+        "caption": "Outside the Wellington, 57th Street."
       }
     },
     {
