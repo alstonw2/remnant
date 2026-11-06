@@ -29,6 +29,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-21 | Coverage gaps are shown, not hidden | Settled |
 | T-22 | One life map, filtered by the scrubber | Settled |
 | T-23 | The entry opens beside the timeline, not below it | Settled |
+| T-24 | Derived reasoning is baked into the record, from one shared prompt | Settled |
 | T-14 | Surface what the model *declined* to promote | Settled |
 | T-15 | Voice lookup fails closed | Settled |
 
@@ -397,3 +398,24 @@ needs explicit affordances it did not need before (a chevron, a hint line, a mar
 row that changes something elsewhere on screen is less obviously clickable than one that expands in place.
 **Revisit when:** Someone misses that the panel changed. If that happens the panel needs a transition, not a
 bigger hint.
+
+
+## T-24 · Derived reasoning is baked into the record, from one shared prompt
+**Status:** Settled · v0.9
+
+**Chose:** `build-life.py --derive` runs the era-grouping and ranking call from the command line and writes
+the answer to `<record>.derived.json`, which every later build merges back in. The prompt itself lives in
+`demo/derive-prompt.txt`, read by both the CLI and the browser button.
+**Over:** Leaving derivation as a browser-only action, which is what it was.
+**Because:** The in-browser version held its result in memory and lost it on reload, so the published page
+shipped with no eras at all — a visitor without an API key met "No eras yet, press Re-derive" exactly where
+the page's best argument should be. Baking the result in means the page ships with real derived reasoning,
+labelled with the model and date, and the button still runs it live for anyone who has a key. Keeping the
+result in its own file rather than in the record means the photo half can be regenerated freely without
+losing what the model concluded.
+**Costs:** Reasoning on the page can now be stale — derived against an earlier version of the record and
+silently carried forward, with only the provenance date to hint at it. Nothing warns when the record has
+changed underneath it. The prompt file is also fetched at runtime by the browser, one more request and one
+more thing that can 404.
+**Revisit when:** The record changes often enough that stale reasoning misleads. The fix is a content hash
+in `_provenance` and a "derived against an older record" warning, not re-deriving on every load.

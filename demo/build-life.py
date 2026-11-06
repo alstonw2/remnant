@@ -13,12 +13,29 @@ Everything a person has to supply themselves — letters, traditions, what they
 actually said — stays in the hand-written section of the output file and is
 merged over whatever this produces.
 
-    ./demo/build-life.py photos.json demo/alston.json [scaffold.json]
+    ./demo/build-life.py photos.json demo/alston.json [scaffold.json] [--derive]
+
+--derive additionally asks Claude to group the years into eras and rank the
+candidate defining moments, writing the answer to <output>.derived.json. That
+file is merged back in on every subsequent build, so the reasoning survives
+regenerating the photo half and the published page ships with it — a visitor
+without an API key still sees real derived reasoning rather than an empty
+state. Needs ANTHROPIC_API_KEY in the environment.
 """
 import json
+import os
 import sys
 import urllib.parse
+import urllib.request
 from collections import defaultdict
+
+# Era grouping and ranking is judgment over a whole life as text, and its output
+# is the thing the page exists to show — so it gets the stronger model, unlike
+# the high-volume perceptual photo curation, which runs on Haiku. See
+# docs/TRADEOFFS.md T-16.
+REASONER = "claude-sonnet-5-5"
+API_URL = "https://api.anthropic.com/v1/messages"
+PROMPT_FILE = "derive-prompt.txt"   # shared with index.html — one source of truth
 
 # Absolute, so the record renders the same whether it is served from the site,
 # from a local dev server, or from someone else's machine.
@@ -88,8 +105,130 @@ def media_for(item):
     return {"src": IMG_BASE + section + "/" + urllib.parse.quote(item["file"])}
 
 
+def build_prompt(record, here):
+    """Fill the shared template. index.html composes the identical prompt from
+    the same file, so the browser button and this CLI cannot drift apart."""
+    by_id = {}
+    for key in ("chapters", "achievements", "letters", "traditions"):
+        for item in record.get(key, []):
+            by_id[item.get("id")] = item
+
+    lines = []
+    for e in record["events"]:
+        ref = by_id.get(e.get("ref"))
+        title = e.get("title") or (ref or {}).get("title") or (ref or {}).get("name") or ""
+        detail = (e.get("detail") or (ref or {}).get("detail") or "")[:160]
+        lines.append("%s [%s] %s%s" % (e["year"], e["kind"], title,
+                                       " — " + detail if detail else ""))
+
+    cands = ["id:%s | %s | %s — %s" % (a["id"], a["year"], a["title"], a.get("detail", ""))
+             for a in record.get("achievements", [])]
+
+    voice = ['%s (%s): "%s"' % (q.get("at") or "undated", q.get("source", ""), q["text"])
+             for q in record.get("voice", {}).get("quotes", [])]
+    # Learnings are passages in the person's own words too, and the prompt is
+    # told to weigh them — so they have to be in the corpus it sees.
+    for key, label in (("chapters", "Chapter"), ("achievements", "Defining moment"),
+                       ("eras", "Era"), ("traditions", "Tradition"), ("letters", "Letter")):
+        for item in record.get(key, []):
+            lrn = item.get("learning") or {}
+            if lrn.get("text"):
+                name = item.get("title") or item.get("name") or item.get("label") or ""
+                voice.append('%s (%s — %s): "%s"' % (lrn.get("at") or "undated", label,
+                                                     name, lrn["text"]))
+    for e in record["events"]:
+        lrn = e.get("learning") or {}
+        if lrn.get("text"):
+            voice.append('%s (%s): "%s"' % (lrn.get("at") or e["year"],
+                                            e.get("title", ""), lrn["text"]))
+
+    years = [e["year"] for e in record["events"]]
+    born = record.get("person", {}).get("born")
+    lo = min(years + ([born] if born else []))
+
+    template = open(os.path.join(here, PROMPT_FILE), encoding="utf-8").read()
+    return (template
+            .replace("{TIMELINE}", "\n".join(lines))
+            .replace("{CANDIDATES}", "\n".join(cands))
+            .replace("{VOICE}", "\n".join(voice) or "(nothing written down yet)")
+            .replace("{FROM}", str(lo))
+            .replace("{TO}", str(max(years))))
+
+
+def derive(record, here, out_path):
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not key:
+        sys.exit("--derive needs ANTHROPIC_API_KEY in the environment.")
+
+    body = json.dumps({
+        "model": REASONER,
+        "max_tokens": 2000,
+        "messages": [{"role": "user", "content": build_prompt(record, here)}],
+    }).encode()
+
+    req = urllib.request.Request(API_URL, data=body, headers={
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+    })
+    print("  asking %s ..." % REASONER)
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            data = json.load(r)
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode("utf-8", "replace")[:300]
+        sys.exit("API error %s: %s" % (e.code, detail))
+
+    text = "".join(b.get("text", "") for b in data.get("content", []))
+    text = text.strip().removeprefix("```json").removeprefix("```").removesuffix("```")
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        sys.exit("Model did not return valid JSON:\n" + text[:400])
+
+    usage = data.get("usage", {})
+    parsed["_provenance"] = {
+        "model": REASONER,
+        "at": __import__("datetime").datetime.now().isoformat(timespec="seconds"),
+        "input_tokens": usage.get("input_tokens"),
+        "output_tokens": usage.get("output_tokens"),
+    }
+    path = out_path.replace(".json", ".derived.json")
+    json.dump(parsed, open(path, "w"), indent=2, ensure_ascii=False)
+    print("  %s: %d eras, %d achievements ranked (%s in / %s out)" % (
+        path, len(parsed.get("eras", [])), len(parsed.get("achievements", [])),
+        usage.get("input_tokens"), usage.get("output_tokens")))
+    return parsed
+
+
+def apply_derived(record, derived):
+    """Only the model's own two outputs are overwritten. Events, chapters,
+    letters, quotes and every learning are the person's and are never touched."""
+    if derived.get("eras"):
+        record["eras"] = derived["eras"]
+        for e in record["events"]:
+            era = next((x for x in record["eras"]
+                        if e["year"] >= x["from"] and (x.get("to") is None or e["year"] <= x["to"])), None)
+            if era:
+                e["era"] = era.get("id")
+    ranked = {a["id"]: a for a in derived.get("achievements", [])}
+    for a in record.get("achievements", []):
+        d = ranked.get(a["id"])
+        if not d:
+            continue
+        if isinstance(d.get("included"), bool):
+            a["included"] = d["included"]
+        if d.get("why"):
+            a["why"] = d["why"]
+    if derived.get("_provenance"):
+        record["_provenance"] = derived["_provenance"]
+
+
 def main():
-    src_path, out_path = sys.argv[1], sys.argv[2]
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    src_path, out_path = args[0], args[1]
+    here = os.path.dirname(os.path.abspath(__file__))
     photos = json.load(open(src_path))
 
     claimed = {cap for _, _, _, caps in CHAPTERS for cap in caps}
@@ -158,8 +297,8 @@ def main():
     # Merge the hand-written half over the generated one. The scaffold owns the
     # person, achievements, letters and quotes; this script owns anything that
     # can be read out of the photo archive.
-    if len(sys.argv) > 3:
-        scaffold = json.load(open(sys.argv[3]))
+    if len(args) > 2:
+        scaffold = json.load(open(args[2]))
         events = events + scaffold.pop("scaffoldEvents", [])
         scaffold.pop("chapters", None)
         # Learnings are keyed by id so they survive regeneration — the photos
@@ -175,8 +314,23 @@ def main():
         out["events"] = events
 
     out["events"] = sorted(out["events"], key=lambda e: e["year"])
+
+    # Reasoning persists across rebuilds: regenerate the photo half as often as
+    # you like without losing what the model concluded.
+    derived_path = out_path.replace(".json", ".derived.json")
+    if "--derive" in flags:
+        derived = derive(out, here, out_path)
+    elif os.path.exists(derived_path):
+        derived = json.load(open(derived_path))
+    else:
+        derived = None
+    if derived:
+        apply_derived(out, derived)
+
     json.dump(out, open(out_path, "w"), indent=2, ensure_ascii=False)
-    print("%s: %d chapters, %d photo moments" % (out_path, len(chapters), len(events)))
+    print("%s: %d chapters, %d photo moments%s" % (
+        out_path, len(chapters), len(events),
+        ", %d eras derived" % len(out.get("eras", [])) if derived else ""))
 
 
 if __name__ == "__main__":

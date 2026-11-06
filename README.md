@@ -27,10 +27,19 @@ something for whoever comes after. These render in the person's own voice, visua
 distinct from the model's reasoning; they are indexed by the voice lookup and weighted
 when the model ranks defining moments.
 
-Era grouping and achievement ranking are real inference, not authored copy. The file ships
-with cached reasoning so the page works with no API key; "Re-derive with AI" runs the call
-live and the provenance line says which you are looking at. That call uses Sonnet rather
-than the Haiku used for photo curation — see `docs/TRADEOFFS.md` T-16.
+Era grouping and achievement ranking are real inference, not authored copy. Derive them
+once from the command line and the result is baked into the published record:
+
+```bash
+export ANTHROPIC_API_KEY=sk-...
+./demo/build-life.py photos.json demo/alston.json demo/alston.scaffold.json --derive
+```
+
+That writes `demo/alston.derived.json`, which every later build merges back in — so the
+photo half can be regenerated without losing the reasoning. The page shows the model and
+date it was derived, and the "Re-derive with AI" button still runs it live for anyone with
+a key. Both paths compose the same prompt from `demo/derive-prompt.txt`. The call uses
+Sonnet rather than the Haiku used for photo curation — see `docs/TRADEOFFS.md` T-16, T-24.
 
 **Guided life profile** — a 4-step flow covering medical directives, traditions and legacy
 messages. No longer part of the demo flow (T-17); still built, still works, reachable at
