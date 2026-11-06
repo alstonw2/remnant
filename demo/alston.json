@@ -488,28 +488,27 @@
       "media": {
         "src": "demo/media/born-1998.jpg",
         "caption": "Qionghai, on the tricycle."
+      },
+      "date": "October 1998"
+    },
+    {
+      "year": 2002,
+      "kind": "milestone",
+      "date": "August 2002",
+      "title": "Kindergarten",
+      "detail": "Announcing the weather, and occasional updates, on the radio.",
+      "place": {
+        "name": "Luxury Kindergarten, Qionghai",
+        "lat": 19.227275,
+        "lng": 110.472438
       }
     },
     {
       "year": 2004,
-      "approx": true,
       "kind": "milestone",
-      "title": "Won the elementary school speech competition",
-      "detail": "First time standing in front of a room and having it go well."
-    },
-    {
-      "year": 2005,
-      "approx": true,
-      "kind": "milestone",
-      "title": "Learned chess, started competing",
-      "detail": "Tournament play as a kid."
-    },
-    {
-      "year": 2005,
-      "approx": true,
-      "kind": "milestone",
-      "title": "A teacher told me I couldn't sing",
-      "detail": "I still cannot sing. Possibly tone deaf.",
+      "title": "Participated in the elementary school speech competition",
+      "detail": "A teacher advised me not to sing. That was the first time I learned I was probably tone-deaf.",
+      "date": "May 2004",
       "learning": {
         "kind": "reflection",
         "at": "2026",
@@ -520,10 +519,17 @@
       "year": 2005,
       "approx": true,
       "kind": "milestone",
+      "title": "Learned chess, started competing",
+      "detail": "Tournament play as a kid."
+    },
+    {
+      "year": 2006,
+      "kind": "milestone",
       "title": "Told my first-grade teacher I was going to America",
       "detail": "In first grade I told my teacher I was going to America — a decision I couldn't quite understand at the time.",
       "link": "poem.html",
-      "linkLabel": "A New Place — read the poem"
+      "linkLabel": "A New Place — read the poem",
+      "date": "August 2006"
     },
     {
       "year": 2006,
