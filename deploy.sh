@@ -64,8 +64,18 @@ cp remnant.html "$WT"/remnant.html
 cp poem.html "$WT"/poem.html
 rm -rf "$WT"/chapters "$WT"/demo
 cp -R chapters "$WT"/chapters
-cp -R demo "$WT"/demo          # the explorer fetches demo/life.json at runtime
-"$GIT" -C "$WT" add remnant.html poem.html chapters demo
+
+# The explorer fetches demo/*.json at runtime, so demo/ ships — but only the
+# content. Dotfiles are working state: .photo-cache holds full-resolution
+# downloads and is gitignored here, but a raw cp -R carried it into the site
+# repo and broke the Pages build.
+mkdir -p "$WT"/demo
+find demo -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -R {} "$WT"/demo/ \;
+
+# This site has no _config.yml, no layouts and no front matter, so Jekyll adds
+# nothing and only introduces ways for a build to fail on file content.
+touch "$WT"/.nojekyll
+"$GIT" -C "$WT" add -A remnant.html poem.html chapters demo .nojekyll
 
 if "$GIT" -C "$WT" diff --cached --quiet; then
   echo "Nothing to publish — already up to date."
