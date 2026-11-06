@@ -76,6 +76,11 @@
         "kind": "reflection",
         "at": "2026",
         "text": "A teacher told me I couldn't sing, and I think I still might be tone deaf to this day. I have remembered that sentence for twenty years, which probably says more about how long an offhand remark from a teacher lasts than it does about my voice."
+      },
+      "place": {
+        "name": "Qionghai No.1 Elementary School",
+        "lat": 19.235812,
+        "lng": 110.464744
       }
     },
     {
@@ -84,6 +89,18 @@
       "kind": "milestone",
       "title": "Learned chess, started competing",
       "detail": "Tournament play as a kid."
+    },
+    {
+      "year": 2005,
+      "approx": true,
+      "kind": "milestone",
+      "title": "Developed my first crush",
+      "detail": "",
+      "place": {
+        "name": "Qionghai No.1 Elementary School",
+        "lat": 19.235812,
+        "lng": 110.464744
+      }
     },
     {
       "year": 2006,
