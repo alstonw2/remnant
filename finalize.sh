@@ -4,7 +4,13 @@
 #   export ANTHROPIC_API_KEY=sk-ant-...
 #   ./finalize.sh                 # derive + curate + build + deploy
 #   ./finalize.sh --no-deploy     # everything except publishing
-#   ./finalize.sh --curate-only guatemala glacier
+#   ./finalize.sh --curate-only --no-deploy            # curate, look, don't publish
+#   ./finalize.sh --curate-only --no-deploy guatemala  # just one chapter
+#   ./finalize.sh --derive-only                        # after the learnings are written
+#
+# Order matters: --curate reads only the photographs and overwrites chapter
+# titles and narratives, so run it before writing anything by hand. --derive
+# reads the learnings and weighs them, so run it after they are written.
 #
 # Both passes write their own file (demo/alston.derived.json,
 # demo/alston.curated.json) which every later build merges back in, so this is
@@ -33,10 +39,15 @@ fi
 
 DEPLOY=1
 CURATE_ONLY=""
-case "${1:-}" in
-  --no-deploy)   DEPLOY=0; shift ;;
-  --curate-only) CURATE_ONLY=1; shift ;;
-esac
+DERIVE_ONLY=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --no-deploy)   DEPLOY=0; shift ;;
+    --curate-only) CURATE_ONLY=1; shift ;;
+    --derive-only) DERIVE_ONLY=1; shift ;;
+    *) break ;;
+  esac
+done
 
 echo "▸ Photos:  $PHOTOS"
 echo
@@ -44,6 +55,9 @@ echo
 if [ -n "$CURATE_ONLY" ]; then
   echo "▸ Curating chapters: ${*:-all}"
   "$PY" "$BUILD" "$PHOTOS" "$RECORD" "$SCAFFOLD" --curate "$@"
+elif [ -n "$DERIVE_ONLY" ]; then
+  echo "▸ Deriving eras and ranking defining moments"
+  "$PY" "$BUILD" "$PHOTOS" "$RECORD" "$SCAFFOLD" --derive
 else
   echo "▸ Deriving eras and ranking defining moments"
   "$PY" "$BUILD" "$PHOTOS" "$RECORD" "$SCAFFOLD" --derive
