@@ -43,6 +43,10 @@ captions, and says why each was chosen:
 ```
 
 Add chapter ids after the scaffold to curate only those (`--curate guatemala glacier`).
+
+Each curated chapter records a fingerprint of the photographs it saw. When you add
+photos later, the build says which chapters have drifted, and
+`./finalize.sh --curate-stale` re-curates just those.
 Photos are downscaled to 768px and cached in `demo/.photo-cache`, so re-runs are cheap.
 
 That writes `demo/alston.derived.json`, which every later build merges back in — so the

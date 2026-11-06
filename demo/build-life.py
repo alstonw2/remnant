@@ -220,6 +220,14 @@ def call_claude(model, content, max_tokens, key):
         raise SystemExit("Model did not return valid JSON:\n" + text[:400])
 
 
+def fingerprint(chapter):
+    """Identifies the exact set of photographs a chapter was curated from, so a
+    later build can tell that photos were added or removed underneath it."""
+    import hashlib
+    srcs = sorted(s.get("src", "") for s in chapter.get("slides", []))
+    return hashlib.sha1("|".join(srcs).encode()).hexdigest()[:16]
+
+
 def fetch_downscaled(url, cache_dir):
     """Download once, downscale with sips, return base64 JPEG.
 
@@ -295,6 +303,7 @@ def curate(record, here, out_path, only_ids):
         slides.extend(videos)
 
         curated[ch["id"]] = {
+            "fingerprint": fingerprint(ch),
             "title": parsed.get("title") or ch.get("title"),
             "narrative": parsed.get("narrative", ""),
             "curationWhy": "%d of %d photographs kept. Chosen for narrative value over "
@@ -319,14 +328,23 @@ def curate(record, here, out_path, only_ids):
 def apply_curated(record, curated):
     """Replace only what the curator produced. The chapter's learning is the
     person's own and is never overwritten; locations stay hand-placed, since
-    the PLACES table is more accurate than inferred coordinates."""
+    the places table is more accurate than inferred coordinates."""
+    stale = []
     for ch in record.get("chapters", []):
         c = curated.get(ch["id"])
         if not c:
             continue
+        # Photographs added or removed since this chapter was curated: the old
+        # selection no longer describes the chapter, so say so rather than
+        # quietly publishing "6 of 13" against a different 13.
+        if c.get("fingerprint") and c["fingerprint"] != fingerprint(ch):
+            stale.append(ch["id"])
         for field in ("title", "narrative", "curationWhy", "slides", "candidates"):
             if c.get(field):
                 ch[field] = c[field]
+        if ch["id"] in stale:
+            ch["curationStale"] = True
+    return stale
 
 
 def list_photos(photos):
@@ -388,6 +406,29 @@ def chapters_from_defs(defs, by_caption, photos, places):
     return chapters, claimed
 
 
+def report_unused(record, photos, places):
+    """After every build, say what the archive holds that the record is not
+    using — the cost of adding photos is forgetting to place them."""
+    in_chapters = {s.get("caption") for c in record.get("chapters", [])
+                   for s in c.get("slides", [])}
+    undated = [p for p in photos if not p.get("date")]
+    loose, missing_pin = set(), set()
+    for p in photos:
+        cap = p.get("caption")
+        if not cap or not p.get("date"):
+            continue
+        if cap not in in_chapters:
+            loose.add(cap)
+        if cap not in places:
+            missing_pin.add(cap)
+    if undated:
+        print("  %d photo(s) have no date and were skipped entirely" % len(undated))
+    if loose:
+        print("  %d caption(s) are timeline moments, in no chapter" % len(loose))
+    if missing_pin:
+        print("  %d caption(s) have no coordinates, so no map pin" % len(missing_pin))
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     flags = {a for a in sys.argv[1:] if a.startswith("--")}
@@ -406,8 +447,9 @@ def main():
     for p in photos:
         by_caption[p.get("caption") or ""].append(p)
 
+    scaffold_places = scaffold.get("places", {})
     chapters, claimed = chapters_from_defs(
-        scaffold.get("chapterDefs", []), by_caption, photos, scaffold.get("places", {}))
+        scaffold.get("chapterDefs", []), by_caption, photos, scaffold_places)
 
     # Dated photographs that aren't part of a chapter become timeline moments.
     loose = []
@@ -469,7 +511,14 @@ def main():
     curate_flags = [f for f in flags if f.startswith("--curate")]
     if curate_flags:
         only = args[3:] if len(args) > 3 else []
-        curated = curate(out, here, out_path, only)
+        if "--curate-stale" in flags:
+            prev = json.load(open(curated_path)) if os.path.exists(curated_path) else {}
+            only = [c["id"] for c in out.get("chapters", [])
+                    if c["id"] in prev and prev[c["id"]].get("fingerprint") != fingerprint(c)]
+            if not only:
+                print("  every curated chapter is up to date")
+        curated = curate(out, here, out_path, only) if (only or "--curate-stale" not in flags) \
+                  else (json.load(open(curated_path)) if os.path.exists(curated_path) else None)
     elif os.path.exists(curated_path):
         curated = json.load(open(curated_path))
     else:
@@ -484,7 +533,11 @@ def main():
         if stale:
             json.dump(curated, open(curated_path, "w"), indent=2, ensure_ascii=False)
             print("  pruned curation for removed chapter(s): %s" % ", ".join(stale))
-        apply_curated(out, curated)
+        outdated = apply_curated(out, curated)
+        if outdated:
+            print("\n  ! photographs changed since these chapters were curated:")
+            for cid in outdated:
+                print("      %s — re-run: ./finalize.sh --curate-only --no-deploy %s" % (cid, cid))
 
     derived_path = out_path.replace(".json", ".derived.json")
     if "--derive" in flags:
@@ -497,6 +550,8 @@ def main():
         apply_derived(out, derived)
 
     json.dump(out, open(out_path, "w"), indent=2, ensure_ascii=False)
+    report_unused(out, photos, scaffold_places)
+
     curated_n = sum(1 for c in out.get("chapters", []) if c.get("curationWhy"))
     print("%s: %d chapters, %d photo moments%s%s" % (
         out_path, len(chapters), len(events),

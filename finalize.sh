@@ -7,6 +7,7 @@
 #   ./finalize.sh --curate-only --no-deploy            # curate, look, don't publish
 #   ./finalize.sh --curate-only --no-deploy guatemala  # just one chapter
 #   ./finalize.sh --derive-only                        # after the learnings are written
+#   ./finalize.sh --curate-stale --no-deploy           # after adding photos
 #
 # Order matters: --curate reads only the photographs and overwrites chapter
 # titles and narratives, so run it before writing anything by hand. --derive
@@ -39,11 +40,13 @@ fi
 
 DEPLOY=1
 CURATE_ONLY=""
+CURATE_STALE=""
 DERIVE_ONLY=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --no-deploy)   DEPLOY=0; shift ;;
     --curate-only) CURATE_ONLY=1; shift ;;
+    --curate-stale) CURATE_STALE=1; shift ;;
     --derive-only) DERIVE_ONLY=1; shift ;;
     *) break ;;
   esac
@@ -52,7 +55,10 @@ done
 echo "▸ Photos:  $PHOTOS"
 echo
 
-if [ -n "$CURATE_ONLY" ]; then
+if [ -n "$CURATE_STALE" ]; then
+  echo "▸ Re-curating only chapters whose photographs changed"
+  "$PY" "$BUILD" "$PHOTOS" "$RECORD" "$SCAFFOLD" --curate-stale
+elif [ -n "$CURATE_ONLY" ]; then
   echo "▸ Curating chapters: ${*:-all}"
   "$PY" "$BUILD" "$PHOTOS" "$RECORD" "$SCAFFOLD" --curate "$@"
 elif [ -n "$DERIVE_ONLY" ]; then

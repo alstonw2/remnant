@@ -32,6 +32,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-24 | Derived reasoning is baked into the record, from one shared prompt | Settled |
 | T-25 | Curation runs from the CLI against the published photographs | Settled |
 | T-26 | Chapters are defined in the scaffold, not in code | Settled |
+| T-27 | Curation carries a fingerprint of what it saw | Settled |
 | T-14 | Surface what the model *declined* to promote | Settled |
 | T-15 | Voice lookup fails closed | Settled |
 
@@ -466,3 +467,22 @@ do not exist. The caption-driven rebuild exposed both. `--list-photos` now print
 exactly this reason.
 **Revisit when:** A typo'd id costs real time. The build should validate ids against the record and fail
 loudly rather than skip.
+
+
+## T-27 · Curation carries a fingerprint of what it saw
+**Status:** Settled · v0.12
+
+**Chose:** Each curated chapter stores a hash of the exact set of photographs it was curated from. Every
+later build compares it to the current set and says plainly when they differ; `--curate-stale` re-curates
+only those chapters.
+**Over:** Trusting cached curation indefinitely, or re-curating everything whenever photos change.
+**Because:** The archive grows — photographs get added to trips that were curated months ago. Without a
+fingerprint the page would keep showing the old six frames and the old "6 of 13" against a chapter that now
+holds twenty, and nothing would say so. That is the worst failure mode available here: not a visible error
+but a quiet lie about what the model actually chose from. Re-curating everything instead would be correct
+and wasteful — most chapters do not change.
+**Costs:** The fingerprint is over photo URLs, so it catches additions, removals and reordering but not a
+photograph replaced at the same URL. It also marks a chapter stale when slides are hand-edited, which is
+technically right and will read as a false alarm to whoever did the editing.
+**Revisit when:** Photographs start being replaced in place rather than added. Then the hash needs to cover
+content, not URLs.
