@@ -615,10 +615,20 @@
         "lng": -74.0135
       },
       "date": "June 2017",
-      "media": {
-        "src": "demo/media/graduation-2017.webp",
-        "caption": "Outside the Wellington, 57th Street."
-      }
+      "media": [
+        {
+          "src": "demo/media/graduation-2017.webp",
+          "caption": "Outside the Wellington, 57th Street."
+        },
+        {
+          "src": "demo/media/prom-2017-group.webp",
+          "caption": "Prom, on the Brooklyn waterfront."
+        },
+        {
+          "src": "demo/media/prom-2017-car.webp",
+          "caption": "Prom, the ride there."
+        }
+      ]
     },
     {
       "year": 2017,
