@@ -16,7 +16,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-06 | Trigger stored as `{type, value}`, not a sentence | Settled |
 | T-07 | Death is one delivery trigger among several | **Open** |
 | T-08 | Local-first storage, which delivery will eventually break | **Open** |
-| T-09 | Retrieval-and-quote over generative persona | Settled |
+| T-09 | Retrieval-and-quote over generative persona | **Revised v0.15** |
 | T-10 | Advance directives demoted out of step 2 | **Open** |
 | T-11 | Lead with a populated life, not an empty form | Settled |
 | T-12 | The whole demo lives in one swappable JSON file | Settled |
@@ -149,7 +149,7 @@ service that holds encrypted blobs and a trigger schedule and never reads conten
 local-first and readable-by-you while buying the delivery mechanic.
 
 ## T-09 · Retrieval-and-quote over generative persona
-**Status:** Settled · v0.2
+**Status:** Revised · v0.2, amended v0.15
 
 **Chose:** Any "what would they have said about this?" feature answers with the person's actual words, dated,
 and returns nothing when they never addressed the topic.
@@ -161,6 +161,12 @@ also more moving — a real sentence with a date on it beats a fluent imitation.
 the archive is thin. That silence is the honest answer and it will still read as a product failure to some users.
 **Revisit when:** Never for impersonation. Summarising *across* a person's own entries, clearly labelled as
 synthesis and always linked to sources, is a separate question worth reopening.
+**Amended v0.15:** the lookup UI is removed. The principle stands and is unchanged — nothing will speak in a
+dead person's voice — but the feature only carries weight when the person genuinely cannot answer. On a living
+author's own record a visitor can simply ask them, so the section demonstrated a mechanism without the
+situation that gives it stakes, against an archive of nine passages. The corpus it searched is retained and
+still feeds the derivation prompt, which weighs a person's own words when ranking what mattered. Rebuild the
+lookup when a record belongs to someone who is gone.
 
 ## T-10 · Advance directives demoted out of step 2
 **Status:** Open · v0.2
