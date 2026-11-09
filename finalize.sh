@@ -25,6 +25,34 @@ SCAFFOLD="demo/alston.scaffold.json"
 BUILD="./demo/build-life.py"
 PY=/usr/bin/python3           # system python is the arm64 one; see README
 
+# Catch a malformed key here rather than after a round trip to the API. The
+# common mistakes are pasting a key onto the end of an example prefix, and
+# leaving a smart-quote or ellipsis in from a copied instruction.
+check_key() {
+  case "$ANTHROPIC_API_KEY" in
+    *sk-ant-*sk-ant-*)
+      echo "Key contains the prefix twice — you pasted it after an example prefix." >&2
+      echo "Export the whole key on its own:  export ANTHROPIC_API_KEY=sk-ant-..." >&2
+      exit 1 ;;
+    sk-ant-*) ;;
+    *)
+      echo "That does not look like an API key (should start with sk-ant-)." >&2
+      exit 1 ;;
+  esac
+  if printf '%s' "$ANTHROPIC_API_KEY" | LC_ALL=C grep -q '[^ -~]'; then
+    echo "Key contains a non-ASCII character — probably a smart quote or … pasted in." >&2
+    exit 1
+  fi
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 \
+         https://api.anthropic.com/v1/models \
+         -H "x-api-key: $ANTHROPIC_API_KEY" -H 'anthropic-version: 2023-06-01')
+  if [ "$code" != "200" ]; then
+    echo "Key rejected by the API (HTTP $code). Nothing was run or spent." >&2
+    exit 1
+  fi
+  echo "▸ Key OK"
+}
+
 if [ -z "$ANTHROPIC_API_KEY" ]; then
   cat >&2 <<MSG
 ANTHROPIC_API_KEY is not set.
@@ -34,6 +62,8 @@ ANTHROPIC_API_KEY is not set.
 MSG
   exit 1
 fi
+
+check_key
 
 [ -f "$PHOTOS" ] || { echo "Can't find photos.json at $PHOTOS" >&2;
                       echo "Set REMNANT_PHOTOS=/path/to/photos.json" >&2; exit 1; }
