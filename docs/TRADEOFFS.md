@@ -34,6 +34,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-26 | Chapters are defined in the scaffold, not in code | Settled |
 | T-27 | Curation carries a fingerprint of what it saw | Settled |
 | T-28 | Every entry states whether it has a place | Settled |
+| T-29 | Cloud AI today, against a stated zero-knowledge requirement | **Open** |
 | T-14 | Surface what the model *declined* to promote | Settled |
 | T-15 | Voice lookup fails closed | Settled |
 
@@ -505,3 +506,21 @@ for an absence, and it will stay noisy until most are tagged. The button also mo
 effect, which is the right behaviour but is the only control on the page that changes two things at once.
 **Revisit when:** Most entries are tagged. At that point the empty pill has done its job and could be
 dropped, or shown only while authoring.
+
+
+## T-29 · Cloud AI today, against a stated zero-knowledge requirement
+**Status:** Open · v0.14
+
+**Chose (so far):** Era derivation and ranking go to the Claude API carrying the record —
+timeline, achievements, and the person's own written learnings. Curation sends downscaled
+photographs. Nothing runs on-device.
+**Over:** Local models, which is what `docs/REQUIREMENTS.md` §4.1 says the product must use.
+**Because:** The page exists to demonstrate the quality of the model's judgment, and on-device
+models are materially weaker at exactly that. Shipping the weaker version would have meant
+shipping nothing worth showing.
+**Costs:** The product cannot currently claim zero-knowledge, and the requirements document
+says it must. That is a live contradiction, not a deferred nicety — anything written publicly
+about a blind vault is false until it is resolved.
+**Revisit when:** Before any privacy claim is published. The most coherent resolution is
+splitting the vault: the *living record* stays processable, *sealed capsules* stay opaque
+until triggered. Your record is a tool you use; your capsules are mail nobody can open.

@@ -70,6 +70,13 @@ interactive, playable slideshow with collage slides, an interactive map of
 where it happened, and full inline editing (rewrite text, reorder slides,
 drop your own map pins).
 
+## Where this is going
+
+`docs/REQUIREMENTS.md` holds the forward-looking spec — age-matched delivery, mutual blind
+disclosure, zero-knowledge custody with multi-guardian key sharding — and records where those
+requirements currently contradict each other or what is built. `docs/TRADEOFFS.md` holds the
+decisions already made and what each one cost.
+
 ## Architecture
 
 - Single static `index.html` — no build step, no framework
