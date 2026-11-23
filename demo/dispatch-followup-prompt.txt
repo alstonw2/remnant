@@ -1,0 +1,33 @@
+Someone is recording who they are right now, addressed to one specific person
+who will read it years from now. This is the present tense of a life, not a
+memoir of it.
+
+They were asked: {QUESTION}
+
+They answered:
+{ANSWER}
+
+Your job is to ask AT MOST ONE follow-up question — or to ask nothing at all.
+
+Ask nothing when either is true:
+  - The answer is already specific and finished, and a follow-up would only pad it.
+  - The answer discloses acute distress, fresh grief, or something the person is
+    plainly still inside of. Pressing someone there to get better material out of
+    them is not a thing this product does. Withhold and say so.
+
+When you do ask, the question must:
+  - be answerable in two or three sentences
+  - turn on a specific noun, name, place or moment the person used themselves
+  - ask what happened, or what they thought at the time
+  - never ask them to name a feeling, extract a lesson, or say what they learned
+  - never flatter, never summarise their answer back to them, and never open with
+    "It sounds like" or "That must have been"
+
+Return ONLY JSON, no prose and no code fence:
+
+{"followup": "<the question>" | null,
+ "why": "<one sentence, 20 words or fewer, on why you asked this — or why you asked nothing>",
+ "withheld": true | false}
+
+Set "withheld" true only for the distress case, never merely because the answer
+was already complete.

@@ -21,6 +21,8 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-11 | Lead with a populated life, not an empty form | Settled |
 | T-12 | The whole demo lives in one swappable JSON file | Settled |
 | T-13 | Every AI decision shows its reasoning, in the same affordance | **Revised v0.4** |
+| T-14 | Surface what the model *declined* to promote | Settled |
+| T-15 | Voice lookup fails closed | Settled |
 | T-16 | Two models: Haiku for seeing, Sonnet for judging | Settled |
 | T-17 | The wizard leaves the demo flow entirely | Settled |
 | T-18 | Private entries keep their shape and withhold their contents | Settled |
@@ -35,8 +37,10 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-27 | Curation carries a fingerprint of what it saw | Settled |
 | T-28 | Every entry states whether it has a place | Settled |
 | T-29 | Cloud AI today, against a stated zero-knowledge requirement | **Open** |
-| T-14 | Surface what the model *declined* to promote | Settled |
-| T-15 | Voice lookup fails closed | Settled |
+| T-30 | First sitting asks for today, not for a life | Settled |
+| T-31 | Day-one records keep their own storage key | Settled |
+| T-32 | The model may decline to ask, and that is shown | Settled |
+| T-33 | An unnamed record over a title nothing stands behind | Settled |
 
 ---
 
@@ -530,3 +534,68 @@ about a blind vault is false until it is resolved.
 **Revisit when:** Before any privacy claim is published. The most coherent resolution is
 splitting the vault: the *living record* stays processable, *sealed capsules* stay opaque
 until triggered. Your record is a tool you use; your capsules are mail nobody can open.
+
+
+## T-30 · The first sitting asks for today, not for a life
+**Status:** Settled · v0.15
+
+**Chose:** A second surface, `#dayone`, that asks four present-tense questions, once, addressed
+to one named person, and seals the result. The timeline is treated as an **output** of repeating
+that sitting, not as something the user fills in up front.
+**Over:** Making the explorer authorable — a blank version of the archive that a new user
+populates with their own events, chapters, places and photographs.
+**Because:** The blank archive is a months-long homework assignment, and that is the actual
+reason records like this never get written. It also produces the wrong artefact: an archive is
+written *about* the past and is therefore remembered, while twelve present-tense sittings are
+written *from inside* the year. Only the second can honestly carry the claim the page already
+makes — that none of it is reconstructed.
+**Costs:** The product now has two surfaces to maintain and explain, and a first-time user sees
+one entry where the demo shows fifty-six. There is no bridge yet between a day-one record and
+the explorer's shape, so the promise that one becomes the other is currently stated rather than
+demonstrated.
+**Revisit when:** A day-one record can render in the explorer. At that point the two surfaces
+are one product with two zoom levels, and the landing page should say so.
+
+## T-31 · The day-one record keeps its own storage key
+**Status:** Settled · v0.15
+
+**Chose:** `remnant_dispatch_v1`, separate from the wizard's `remnant_v2`, with its own save
+path — though it reuses `pushRevision` so revision semantics cannot drift between the two.
+**Over:** Extending `remnant_v2` with a new entry kind, which is where this data arguably belongs.
+**Because:** `remnant_v2` is read back out of the DOM by `syncEntriesFromDom`, so it only exists
+coherently while the wizard is on screen. A first sitting that failed halfway should not be able
+to damage a record someone has been keeping for years.
+**Costs:** Two stores, so a future merge has to reconcile them, and a user who has used both has
+their life in two places. Export will have to read both.
+**Revisit when:** Day-one records need to appear in the explorer, which is the point at which
+one store becomes unavoidable.
+
+## T-32 · The model may decline to ask, and that is shown
+**Status:** Settled · v0.15
+
+**Chose:** The follow-up prompt can return `withheld: true` — no question at all — when an answer
+discloses acute distress. The refusal renders as a card of its own, in a different colour from a
+question, carrying the model's reason.
+**Over:** Always asking something, or silently skipping with no explanation.
+**Because:** The whole surface is an interview, and an interviewer who presses someone describing
+a parent's diagnosis to produce better material is the version of this product not worth building.
+Showing the refusal rather than hiding it is also the single most useful thing on the page for a
+reader assessing judgment: most AI features demonstrate a model generating more.
+**Costs:** It is the model's call, so it will sometimes withhold where a question would have been
+welcome, and the user has no way to ask for one anyway. A withheld follow-up also costs a call and
+returns nothing visible but a sentence.
+**Revisit when:** Real sittings exist to check it against. If it withholds on answers that were
+merely sad rather than acute, the threshold in `demo/dispatch-followup-prompt.txt` is too low.
+
+## T-33 · An unnamed record over a title nothing stands behind
+**Status:** Settled · v0.15
+
+**Chose:** If the naming call fails, the entry seals anyway and renders as "Unnamed", saying which
+step did not run.
+**Over:** A local fallback title built from the date, the recipient, or the first few words.
+**Because:** The same rule as T-15 — fail closed rather than infer. A plausible-looking title the
+model never produced is indistinguishable, later, from one it did, and the naming is the part a
+reader is being asked to judge.
+**Costs:** Without a key the product's most visible output is an empty slot, which demos badly. The
+honest version is less impressive than the dishonest one, which is the usual shape of this tradeoff.
+**Revisit when:** Never, unless naming moves on-device, at which point there is no failure to handle.

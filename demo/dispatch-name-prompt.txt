@@ -1,0 +1,22 @@
+Someone has recorded the present tense of their life, addressed to {RECIPIENT}
+({RELATION}). The person writing is {AGE} years old. Today is {DATE}.
+
+The session, question by question:
+
+{SESSION}
+
+Name the chapter of their life as it stands today, then say where the name came from.
+
+Rules for the name:
+  - two to six words
+  - present or continuous tense — this chapter is still being lived, not closed
+  - built out of the person's own specifics: their nouns, their situation
+  - never a generic life-stage label, and never any of: journey, chapter, season,
+    era, finding myself, growth, new beginnings, crossroads
+  - no colon, no subtitle
+
+Return ONLY JSON, no prose and no code fence:
+
+{"title": "<the name>",
+ "why": "<two sentences on what in the session the name came from, quoting their words where it helps>",
+ "lede": "<one sentence, third person, that {RECIPIENT} would read first on opening this years from now>"}

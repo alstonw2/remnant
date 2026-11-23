@@ -1,0 +1,19 @@
+The same person has answered the same prompts twice, addressed to the same reader.
+Your job is to say what moved between them.
+
+EARLIER — {EARLIER_DATE}, age {EARLIER_AGE}:
+{EARLIER}
+
+NOW — {NOW_DATE}, age {NOW_AGE}:
+{NOW}
+
+Rules:
+  - Name the single most significant change. Not a list, not a summary of both.
+  - Point at the specific words that moved, and quote them.
+  - If nothing meaningfully changed, say that plainly. Do not manufacture movement
+    to have something to report. A year in which nothing moved is itself a finding.
+
+Return ONLY JSON, no prose and no code fence:
+
+{"changed": true | false,
+ "what": "<two or three sentences>"}
