@@ -1389,6 +1389,294 @@
     @media (max-width: 640px) { .rail-geo { margin-left: calc(3.4rem + 1.4rem + 1rem); } }
   
     .cov-year.blank { background: none; height: 0; pointer-events: none; }
+
+    /* ═══════════════════════════════════════════════
+       DAY ONE — the present-tense flow.
+       A record starts with today, not with 1998. The archive in #explore is
+       what this becomes after ten years of it; this is the first sitting.
+       Deliberately narrower and quieter than the explorer: one question on
+       screen at a time, nothing to scrub, nothing to drag.
+    ════════════════════════════════════════════════ */
+    #dayone { display: none; }
+    #dayone.open { display: block; }
+
+    .d1-wrap { max-width: 640px; margin: 0 auto; padding: 1rem 1.5rem 7rem; }
+
+    .d1-dots { display: flex; gap: .4rem; justify-content: center; margin: 2.2rem 0 3rem; }
+    .d1-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(44,44,44,.15); transition: background .3s, transform .3s;
+    }
+    .d1-dot.done { background: rgba(45,74,62,.4); }
+    .d1-dot.now  { background: var(--terra); transform: scale(1.5); }
+
+    .d1-step { display: none; }
+    .d1-step.active { display: block; animation: fadeUp .5s ease both; }
+
+    .d1-kicker {
+      font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1rem;
+    }
+    .d1-q {
+      font-family: 'Lora', serif;
+      font-size: clamp(1.5rem, 3.6vw, 2.1rem);
+      line-height: 1.35; color: var(--ink); margin-bottom: .9rem;
+    }
+    .d1-note {
+      font-size: .92rem; line-height: 1.7; color: var(--muted);
+      max-width: 54ch; margin-bottom: 1.6rem;
+    }
+
+    .d1-ta, .d1-in {
+      width: 100%; font-family: 'Inter', sans-serif; font-size: 1rem;
+      line-height: 1.7; color: var(--ink);
+      background: #fff; border: 1px solid rgba(44,44,44,.14);
+      border-radius: 8px; padding: 1rem 1.1rem;
+      transition: border-color .2s, box-shadow .2s;
+      resize: vertical;
+    }
+    .d1-ta { min-height: 8.5rem; }
+    .d1-ta:focus, .d1-in:focus {
+      outline: none; border-color: var(--terra);
+      box-shadow: 0 0 0 3px rgba(196,113,58,.1);
+    }
+    .d1-ta::placeholder, .d1-in::placeholder { color: rgba(122,110,98,.6); }
+
+    .d1-field { margin-bottom: 1.3rem; }
+    .d1-label {
+      display: block; font-size: .78rem; letter-spacing: .04em;
+      color: var(--muted); margin-bottom: .45rem; font-weight: 500;
+    }
+    .d1-row { display: flex; gap: .9rem; flex-wrap: wrap; }
+    .d1-row > * { flex: 1 1 10rem; }
+
+    .d1-actions {
+      display: flex; gap: .8rem; align-items: center;
+      flex-wrap: wrap; margin-top: 1.5rem;
+    }
+    .d1-skip {
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      color: var(--muted); font-size: .88rem; text-decoration: underline;
+      text-underline-offset: 3px; padding: .5rem 0;
+    }
+    .d1-skip:hover { color: var(--ink); }
+    .d1-btn {
+      background: var(--green); color: #fff; font-family: inherit;
+      font-weight: 600; font-size: .95rem; padding: .78rem 1.9rem;
+      border: none; border-radius: 2rem; cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+    .d1-btn:hover:not(:disabled) { background: var(--green-lt); transform: translateY(-1px); }
+    .d1-btn:disabled { opacity: .45; cursor: default; }
+
+    /* ── The model's turn ─────────────────────────────
+       Marked as the model's, always. The person's words and the machine's
+       question never share a visual register. */
+    .d1-ai {
+      margin-top: 1.6rem; padding: 1.2rem 1.3rem;
+      background: rgba(45,74,62,.045);
+      border-left: 2px solid var(--green);
+      border-radius: 0 6px 6px 0;
+      animation: fadeUp .45s ease both;
+    }
+    .d1-ai-who {
+      font-size: .64rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--green); margin-bottom: .6rem;
+      display: flex; align-items: center; gap: .45rem;
+    }
+    .d1-ai-who::before { content: '◆'; font-size: .5rem; }
+    .d1-ai-q {
+      font-family: 'Lora', serif; font-size: 1.12rem; line-height: 1.55;
+      color: var(--ink); margin-bottom: .9rem;
+    }
+
+    /* Restraint. The model declining to ask is a result, not an error, so it
+       gets a card of its own rather than silence. */
+    .d1-withheld {
+      margin-top: 1.6rem; padding: 1.2rem 1.3rem;
+      background: rgba(184,149,63,.07);
+      border-left: 2px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+    }
+    .d1-withheld .d1-ai-who { color: var(--gold); }
+    .d1-withheld p {
+      font-size: .94rem; line-height: 1.7; color: var(--ink); margin: 0;
+    }
+
+    .d1-thinking {
+      display: flex; align-items: center; gap: .6rem;
+      margin-top: 1.6rem; font-size: .88rem; color: var(--muted);
+    }
+    .d1-thinking span {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--terra);
+      animation: d1pulse 1.2s ease-in-out infinite;
+    }
+    .d1-thinking span:nth-child(2) { animation-delay: .2s; }
+    .d1-thinking span:nth-child(3) { animation-delay: .4s; }
+    @keyframes d1pulse { 0%,100% { opacity: .25 } 50% { opacity: 1 } }
+
+    .d1-err {
+      margin-top: 1.2rem; padding: .9rem 1.1rem;
+      background: rgba(196,113,58,.08); border-left: 2px solid var(--terra);
+      border-radius: 0 6px 6px 0; font-size: .88rem; color: var(--ink);
+      line-height: 1.6;
+    }
+
+    /* ── Trigger choice ──────────────────────────── */
+    .d1-trigs { display: grid; gap: .7rem; margin-bottom: 1.4rem; }
+    .d1-trig {
+      display: block; text-align: left; width: 100%;
+      background: #fff; border: 1px solid rgba(44,44,44,.14);
+      border-radius: 8px; padding: 1rem 1.1rem; cursor: pointer;
+      font-family: inherit; transition: border-color .2s, background .2s;
+    }
+    .d1-trig:hover { border-color: rgba(196,113,58,.5); }
+    .d1-trig.on { border-color: var(--terra); background: rgba(196,113,58,.05); }
+    .d1-trig-t {
+      font-weight: 600; font-size: .98rem; color: var(--ink);
+      margin-bottom: .25rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .d1-trig.on .d1-trig-t::after {
+      content: '✓'; color: var(--terra); font-size: .85rem; margin-left: auto;
+    }
+    .d1-trig-d { font-size: .86rem; line-height: 1.6; color: var(--muted); }
+
+    /* ── The sealed object ───────────────────────────
+       Rendered as a letter, not as a timeline with one dot on it. On day one
+       there is exactly one of these, and it has to look finished on its own. */
+    .d1-letter {
+      background: var(--green); color: #fff;
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 18px 50px rgba(45,74,62,.22);
+      animation: fadeUp .6s ease both;
+    }
+    .d1-letter-top {
+      padding: 2.2rem 2rem 1.8rem;
+      border-bottom: 1px solid rgba(255,255,255,.14);
+      position: relative;
+      background: radial-gradient(ellipse at 80% 0%, rgba(196,113,58,.22) 0%, transparent 60%);
+    }
+    .d1-wax {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--terra); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Lora', serif; font-size: 1.1rem;
+      margin-bottom: 1.3rem;
+      box-shadow: 0 3px 12px rgba(196,113,58,.4);
+    }
+    .d1-letter-to {
+      font-size: .66rem; letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(255,255,255,.5); margin-bottom: .5rem;
+    }
+    .d1-letter-name {
+      font-family: 'Lora', serif; font-size: 1.9rem; line-height: 1.25;
+      margin-bottom: .9rem;
+    }
+    .d1-letter-lede {
+      font-size: .98rem; line-height: 1.75; color: rgba(255,255,255,.76);
+      max-width: 46ch; font-style: italic;
+    }
+    .d1-meta {
+      display: grid; gap: .9rem 1.6rem;
+      grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+      padding: 1.3rem 2rem;
+      border-bottom: 1px solid rgba(255,255,255,.14);
+    }
+    .d1-meta dt {
+      font-size: .62rem; letter-spacing: .16em; text-transform: uppercase;
+      color: rgba(255,255,255,.45); margin-bottom: .22rem;
+    }
+    .d1-meta dd { font-size: .95rem; color: #fff; margin: 0; }
+    .d1-letter-body { padding: 1.8rem 2rem 2.2rem; }
+    .d1-letter-body .d1-qa { margin-bottom: 1.6rem; }
+    .d1-letter-body .d1-qa:last-child { margin-bottom: 0; }
+    .d1-qa-q {
+      font-size: .78rem; color: rgba(255,255,255,.55);
+      line-height: 1.6; margin-bottom: .45rem;
+    }
+    .d1-qa-a {
+      font-size: .97rem; line-height: 1.8; color: rgba(255,255,255,.92);
+      white-space: pre-wrap;
+    }
+    .d1-qa-f {
+      margin-top: .8rem; padding-left: .9rem;
+      border-left: 1px solid rgba(255,255,255,.2);
+    }
+    .d1-letter .why {
+      border-color: rgba(255,255,255,.35); color: rgba(255,255,255,.75);
+    }
+    .d1-letter .why:hover { background: rgba(255,255,255,.1); }
+    .d1-letter .why-body {
+      background: rgba(255,255,255,.07); border-left-color: rgba(255,255,255,.4);
+      color: rgba(255,255,255,.8);
+    }
+    .d1-letter .why-body em { color: #fff; }
+
+    .d1-after { margin-top: 2.2rem; }
+    .d1-recall {
+      display: flex; gap: 1rem; align-items: flex-start;
+      padding: 1.3rem 1.4rem; background: #fff;
+      border: 1px solid rgba(44,44,44,.1); border-radius: 10px;
+    }
+    .d1-recall-cal {
+      flex: 0 0 auto; width: 46px; text-align: center;
+      border: 1px solid rgba(44,44,44,.12); border-radius: 6px; overflow: hidden;
+    }
+    .d1-recall-cal b {
+      display: block; background: var(--green); color: #fff;
+      font-size: .58rem; letter-spacing: .1em; padding: .22rem 0;
+      text-transform: uppercase; font-weight: 600;
+    }
+    .d1-recall-cal i {
+      display: block; font-style: normal; font-family: 'Lora', serif;
+      font-size: 1.3rem; padding: .25rem 0; color: var(--ink);
+    }
+    .d1-recall-t { font-weight: 600; font-size: .95rem; margin-bottom: .3rem; }
+    .d1-recall-d { font-size: .88rem; line-height: 1.65; color: var(--muted); }
+
+    /* Drift — only ever rendered with two or more sittings to compare. */
+    .d1-drift {
+      margin-top: 1.1rem; padding: 1.3rem 1.4rem;
+      background: rgba(196,113,58,.06);
+      border: 1px solid rgba(196,113,58,.22); border-radius: 10px;
+    }
+    .d1-drift-h {
+      font-size: .66rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--terra); margin-bottom: .6rem;
+    }
+    .d1-drift p { font-size: .94rem; line-height: 1.75; color: var(--ink); margin: 0; }
+
+    .d1-shelf { margin-top: 2.4rem; }
+    .d1-shelf-h {
+      font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .9rem;
+    }
+    .d1-card {
+      display: flex; align-items: center; gap: 1rem; width: 100%;
+      text-align: left; font-family: inherit;
+      background: #fff; border: 1px solid rgba(44,44,44,.1);
+      border-radius: 8px; padding: .9rem 1.1rem; margin-bottom: .6rem;
+      cursor: pointer; transition: border-color .2s, transform .15s;
+    }
+    .d1-card:hover { border-color: var(--terra); transform: translateY(-1px); }
+    .d1-card-age {
+      flex: 0 0 auto; font-family: 'Lora', serif; font-size: 1.2rem;
+      color: var(--green); min-width: 2.4rem;
+    }
+    .d1-card-t { font-weight: 600; font-size: .95rem; color: var(--ink); }
+    .d1-card-d { font-size: .82rem; color: var(--muted); margin-top: .15rem; }
+
+    .d1-foot {
+      margin-top: 3rem; padding-top: 1.6rem;
+      border-top: 1px solid rgba(44,44,44,.1);
+      font-size: .86rem; line-height: 1.7; color: var(--muted);
+    }
+    .d1-foot a { color: var(--terra); }
+
+    @media (max-width: 560px) {
+      .d1-meta { gap: .8rem 1.1rem; }
+      .d1-letter-top, .d1-meta, .d1-letter-body { padding-left: 1.3rem; padding-right: 1.3rem; }
+    }
   </style>
 </head>
 <body>
@@ -1418,6 +1706,15 @@
            min="1951" max="2026" value="1951" step="1"
            aria-label="Scrub through the years of this life" />
     <div class="hero-hint">Drag — or use the arrow keys</div>
+  </div>
+
+  <!-- The product is the day-one flow; the explorer below it is the exhibit of
+       what the flow produces after years of use. -->
+  <div class="fade-up" style="animation-delay:.18s;margin-top:2.6rem">
+    <button class="btn-primary" onclick="openDayOne()">Record today</button>
+    <div style="color:rgba(255,255,255,.45);font-size:.82rem;margin-top:.8rem">
+      Ten minutes. Four questions. One person it is addressed to.
+    </div>
   </div>
 
   <div class="fade-up" style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation-delay:.2s;margin-top:2.4rem">
@@ -2228,6 +2525,143 @@
   </div>
 </div>
 
+
+
+<!-- ═══════════════════════════════════════════════
+     DAY ONE — the present-tense flow.
+
+     The explorer above is a finished record: 56 events, five eras, a map.
+     That is what this becomes after years of it, and it is the wrong thing
+     to hand someone on their first day — a blank version of it is a
+     months-long homework assignment, which is why nobody starts.
+
+     So this surface asks for today only. One sitting, one reader, one sealed
+     thing. The timeline is the output, not the input.
+════════════════════════════════════════════════ -->
+<div id="dayone">
+  <div class="ex-topbar">
+    <div class="prog-logo">Remnant</div>
+    <span class="demo-badge" id="d1-badge" hidden>Today</span>
+    <div class="ex-spacer"></div>
+    <button class="btn-back" onclick="closeDayOne()">← Home</button>
+  </div>
+
+  <div class="d1-wrap">
+    <div class="d1-dots" id="d1-dots" hidden></div>
+
+    <!-- ── 0 · Open ──────────────────────────────── -->
+    <div class="d1-step active" id="d1-step-0">
+      <div class="d1-kicker">Begin</div>
+      <h1 class="d1-q">There is a version of you<br/>that exists only today.</h1>
+      <p class="d1-note">
+        Not the one in your photographs, and not the one anyone will remember. The one
+        in the middle of whatever you are in the middle of. Ten minutes, four questions,
+        one person it is addressed to. You will be asked again in a month, and the
+        month after that — and the record builds itself out of the answers.
+      </p>
+      <div class="d1-actions">
+        <button class="d1-btn" onclick="d1Begin()">Start today's entry</button>
+      </div>
+      <div id="d1-resume" hidden style="margin-top:2rem"></div>
+      <div class="d1-shelf" id="d1-shelf" hidden></div>
+      <div class="d1-foot">
+        Everything stays in this browser. Nothing is uploaded except the words you
+        answer with, and only to generate the follow-up questions —
+        <a href="#" onclick="openExplore();return false;">see what this becomes after twenty-eight years</a>.
+      </div>
+    </div>
+
+    <!-- ── 1 · The reader ───────────────────────────
+         The single highest-leverage field in the product. "What should people
+         know about me" produces a profile; "what should Amy know about me"
+         produces the truth. Addressing is not metadata. -->
+    <div class="d1-step" id="d1-step-1">
+      <div class="d1-kicker">Step one</div>
+      <h2 class="d1-q">Who is this for?</h2>
+      <p class="d1-note">
+        One person, by name. Not "my family" — a record addressed to everyone is
+        written to no one, and you can hear it in the writing.
+      </p>
+      <div class="d1-field">
+        <label class="d1-label" for="d1-to">Their name</label>
+        <input class="d1-in" id="d1-to" type="text" placeholder="Amy" autocomplete="off" />
+      </div>
+      <div class="d1-row">
+        <div class="d1-field">
+          <label class="d1-label" for="d1-rel">Who they are to you</label>
+          <input class="d1-in" id="d1-rel" type="text" placeholder="my daughter" autocomplete="off" />
+        </div>
+        <div class="d1-field">
+          <label class="d1-label" for="d1-toage">Their age now <span style="opacity:.6">— optional</span></label>
+          <input class="d1-in" id="d1-toage" type="number" min="0" max="120" placeholder="4" />
+        </div>
+      </div>
+      <div class="d1-actions">
+        <button class="d1-btn" id="d1-next-1" onclick="d1Step(2)" disabled>Continue</button>
+      </div>
+    </div>
+
+    <!-- ── 2 · Your age ─────────────────────────────
+         Present-tense entries are age-stamped for free. This is what makes an
+         age-matched delivery mechanically possible later: no backfill, because
+         the record was never written about the past. -->
+    <div class="d1-step" id="d1-step-2">
+      <div class="d1-kicker">Step two</div>
+      <h2 class="d1-q">And how old are you today?</h2>
+      <p class="d1-note">
+        Every entry is stamped with your age, not just the date. It is the only
+        index two people's records ever share — so that one day this can be opened
+        by someone at the age you were when you wrote it, rather than on a calendar
+        date that happens to land on a teenager.
+      </p>
+      <div class="d1-field" style="max-width:9rem">
+        <label class="d1-label" for="d1-age">Your age</label>
+        <input class="d1-in" id="d1-age" type="number" min="5" max="120" placeholder="28" />
+      </div>
+      <div class="d1-note" id="d1-agematch" style="margin-bottom:0"></div>
+      <div class="d1-actions">
+        <button class="d1-btn" id="d1-next-2" onclick="d1StartQuestions()" disabled>Continue</button>
+      </div>
+    </div>
+
+    <!-- ── 3 · The questions, one at a time ───────── -->
+    <div class="d1-step" id="d1-step-3">
+      <div class="d1-kicker" id="d1-qk">Question one of four</div>
+      <h2 class="d1-q" id="d1-qt">—</h2>
+      <p class="d1-note" id="d1-qn"></p>
+      <textarea class="d1-ta" id="d1-qa" placeholder="However much or little you want to say."></textarea>
+      <div id="d1-qai"></div>
+      <div class="d1-actions" id="d1-qacts">
+        <button class="d1-btn" id="d1-qnext" onclick="d1AnswerQuestion()" disabled>Continue</button>
+        <button class="d1-skip" onclick="d1SkipQuestion()">Skip this one</button>
+      </div>
+    </div>
+
+    <!-- ── 4 · Seal ─────────────────────────────────
+         The trigger is the whole difference between this and a journal. -->
+    <div class="d1-step" id="d1-step-4">
+      <div class="d1-kicker">Last step</div>
+      <h2 class="d1-q">When should <span id="d1-seal-name">they</span> get this?</h2>
+      <p class="d1-note">
+        Sealed means sealed — you can keep adding, but nobody reads it until the
+        condition you pick here is met.
+      </p>
+      <div class="d1-trigs" id="d1-trigs"></div>
+      <div class="d1-field hidden" id="d1-trig-date-wrap">
+        <label class="d1-label" for="d1-trig-date">The date</label>
+        <input class="d1-in" id="d1-trig-date" type="date" style="max-width:14rem" />
+      </div>
+      <div class="d1-actions">
+        <button class="d1-btn" id="d1-seal-btn" onclick="d1Seal()" disabled>Seal it</button>
+      </div>
+    </div>
+
+    <!-- ── 5 · The sealed object ──────────────────── -->
+    <div class="d1-step" id="d1-step-5">
+      <div id="d1-out"></div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════
@@ -4538,6 +4972,649 @@ function applyDerived(parsed) {
     if (typeof d.included === 'boolean') a.included = d.included;
     if (d.why) a.why = d.why;
   });
+}
+
+// ═══════════════════════════════════════════════
+// DAY ONE — the present-tense flow
+//
+// Why this exists beside the explorer: a blank version of the explorer is a
+// months-long homework assignment, and that is the actual reason records like
+// this never get written. This surface asks only for today. Do it twelve times
+// and you have a year of a life you never sat down to write — and unlike a
+// memoir, it was written from inside the year rather than remembered afterwards,
+// which is the one claim a reconstructed archive can never make.
+//
+// Storage is deliberately its own key. The wizard's `remnant_v2` is a different
+// shape with a different lifecycle, and a first sitting should not be able to
+// corrupt a record someone has been keeping for years.
+// ═══════════════════════════════════════════════
+const D1_KEY = 'remnant_dispatch_v1';
+
+const D1_QUESTIONS = [
+  { id: 'mind',
+    q: 'What is taking up most of your mind right now?',
+    note: 'Whatever you were thinking about before you opened this. Not the headline version.' },
+  { id: 'fine',
+    q: 'What are you pretending to be fine about?',
+    note: 'The thing you have a short answer ready for when people ask.' },
+  { id: 'know',
+    q: 'What do you want {NAME} to know about who you are at {AGE}?',
+    note: 'They will only ever meet the version of you that exists by the time they can understand it. This is the one they cannot reach.' },
+  { id: 'deciding',
+    q: 'What are you still deciding?',
+    note: 'Something genuinely open. Not a decision you have made and are describing.' }
+];
+
+let d1All   = [];     // prior sealed dispatches, oldest first
+let d1       = null;  // the one being written
+let d1QI     = 0;     // which question
+let d1Stage  = 'answer';
+let d1Tpl    = {};    // prompt-template cache, keyed by filename
+
+// ── Storage ───────────────────────────────────
+function d1Load() {
+  try {
+    const raw = localStorage.getItem(D1_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (Array.isArray(data.dispatches)) d1All = data.dispatches;
+  } catch (e) { console.warn('Remnant: could not read dispatches —', e.message); }
+}
+
+function d1Save() {
+  const data = { schema: 1, savedAt: new Date().toISOString(), dispatches: d1All };
+  for (let attempt = 0; attempt < 40; attempt++) {
+    try { localStorage.setItem(D1_KEY, JSON.stringify(data)); return true; }
+    catch (e) {
+      // Shed the oldest revision rather than the current answers, same policy
+      // as the wizard: history is the first thing that can be spared.
+      let oldest = null;
+      d1All.forEach(d => {
+        if (!d.revisions || d.revisions.length < 2) return;
+        const at = Date.parse(d.revisions[0].at);
+        if (!oldest || at < oldest.at) oldest = { at, list: d.revisions };
+      });
+      if (!oldest) break;
+      oldest.list.shift();
+    }
+  }
+  console.warn('Remnant: could not save — browser storage is full.');
+  return false;
+}
+
+// ── Screens ───────────────────────────────────
+function openDayOne() {
+  d1Load();
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('dayone').classList.add('open');
+  document.getElementById('d1-badge').hidden = false;
+  d1RenderShelf();
+  d1RenderResume();
+  d1Step(0);
+  window.scrollTo({ top: 0 });
+}
+
+function closeDayOne() {
+  document.getElementById('dayone').classList.remove('open');
+  document.getElementById('landing').style.display = 'flex';
+  window.scrollTo({ top: 0 });
+}
+
+function d1Step(n) {
+  for (let i = 0; i <= 5; i++) {
+    const el = document.getElementById('d1-step-' + i);
+    if (el) el.classList.toggle('active', i === n);
+  }
+  const dots = document.getElementById('d1-dots');
+  dots.hidden = (n === 0 || n === 5);
+  if (!dots.hidden) d1Dots(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Seven beats: the reader, your age, four questions, the seal.
+function d1Dots(step) {
+  const at = step === 3 ? 2 + d1QI : (step === 4 ? 6 : step - 1);
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const cls = i < at ? 'done' : (i === at ? 'now' : '');
+    html += '<div class="d1-dot ' + cls + '"></div>';
+  }
+  document.getElementById('d1-dots').innerHTML = html;
+}
+
+// ── Step 1 · the reader ───────────────────────
+function d1Begin() {
+  d1 = {
+    id: 'd' + Date.now().toString(36),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    to: { name: '', relation: '', age: null },
+    authorAge: null,
+    answers: [],
+    trigger: null,
+    naming: null,
+    drift: null,
+    revisions: []
+  };
+  d1QI = 0;
+  // Offer the last reader again — a monthly record is usually to the same person.
+  const prev = d1All[d1All.length - 1];
+  if (prev) {
+    document.getElementById('d1-to').value    = prev.to.name || '';
+    document.getElementById('d1-rel').value   = prev.to.relation || '';
+    document.getElementById('d1-toage').value = prev.to.age == null ? '' : prev.to.age;
+    document.getElementById('d1-age').value   = prev.authorAge == null ? '' : prev.authorAge;
+  }
+  d1GateReader();
+  d1GateAge();
+  d1Step(1);
+}
+
+function d1GateReader() {
+  const ok = document.getElementById('d1-to').value.trim().length > 0;
+  document.getElementById('d1-next-1').disabled = !ok;
+}
+
+function d1GateAge() {
+  const v = Number(document.getElementById('d1-age').value);
+  const ok = v >= 5 && v <= 120;
+  document.getElementById('d1-next-2').disabled = !ok;
+
+  // Show the age-match mechanic as a consequence rather than as a feature.
+  const note = document.getElementById('d1-agematch');
+  const theirAge = Number(document.getElementById('d1-toage').value);
+  const name = document.getElementById('d1-to').value.trim() || 'they';
+  if (ok && theirAge > 0 && theirAge < v) {
+    const wait = v - theirAge;
+    note.innerHTML = esc(name) + ' is ' + theirAge + '. Sealed to open at the age you are now, ' +
+      'this reaches ' + esc(name) + ' in <b>' + wait + ' years</b> — as a peer, not as a child.';
+  } else { note.innerHTML = ''; }
+}
+
+// ── Step 3 · the questions ────────────────────
+function d1StartQuestions() {
+  d1.to = {
+    name:     document.getElementById('d1-to').value.trim(),
+    relation: document.getElementById('d1-rel').value.trim(),
+    age:      document.getElementById('d1-toage').value ? Number(document.getElementById('d1-toage').value) : null
+  };
+  d1.authorAge = Number(document.getElementById('d1-age').value);
+  d1QI = 0;
+  d1RenderQuestion();
+  d1Step(3);
+}
+
+function d1QuestionText(i) {
+  return D1_QUESTIONS[i].q
+    .replace('{NAME}', d1.to.name || 'them')
+    .replace('{AGE}', String(d1.authorAge));
+}
+
+const D1_ORDINALS = ['one', 'two', 'three', 'four'];
+
+function d1RenderQuestion() {
+  d1Stage = 'answer';
+  document.getElementById('d1-qk').textContent = 'Question ' + D1_ORDINALS[d1QI] + ' of four';
+  document.getElementById('d1-qt').textContent = d1QuestionText(d1QI);
+  document.getElementById('d1-qn').textContent = D1_QUESTIONS[d1QI].note;
+  const ta = document.getElementById('d1-qa');
+  ta.value = '';
+  ta.placeholder = 'However much or little you want to say.';
+  document.getElementById('d1-qai').innerHTML = '';
+  document.getElementById('d1-qacts').classList.remove('hidden');
+  document.getElementById('d1-qnext').textContent = 'Continue';
+  document.getElementById('d1-qnext').disabled = true;
+  d1Dots(3);
+  ta.focus();
+}
+
+function d1GateAnswer() {
+  const v = document.getElementById('d1-qa').value.trim();
+  document.getElementById('d1-qnext').disabled = v.length < 2;
+}
+
+function d1SkipQuestion() {
+  d1.answers.push({
+    id: D1_QUESTIONS[d1QI].id,
+    question: d1QuestionText(d1QI),
+    answer: '', skipped: true,
+    followup: null, followupAnswer: '', why: '', withheld: false
+  });
+  d1Advance();
+}
+
+// The answer is recorded before the model is consulted. If the call fails, the
+// person's words are already kept — the follow-up is an enhancement, never a
+// gate on their own record.
+async function d1AnswerQuestion() {
+  if (d1Stage === 'followup') { d1CloseFollowup(); return; }
+
+  const text = document.getElementById('d1-qa').value.trim();
+  const rec = {
+    id: D1_QUESTIONS[d1QI].id,
+    question: d1QuestionText(d1QI),
+    answer: text, skipped: false,
+    followup: null, followupAnswer: '', why: '', withheld: false
+  };
+  d1.answers.push(rec);
+  d1.updatedAt = new Date().toISOString();
+
+  const acts = document.getElementById('d1-qacts');
+  const box  = document.getElementById('d1-qai');
+  acts.classList.add('hidden');
+  box.innerHTML = '<div class="d1-thinking"><span></span><span></span><span></span>' +
+                  'Reading what you wrote…</div>';
+
+  let res = null;
+  try {
+    res = await d1Call('demo/dispatch-followup-prompt.txt',
+      { '{QUESTION}': rec.question, '{ANSWER}': text }, 500);
+  } catch (e) {
+    box.innerHTML = '<div class="d1-err"><b>No follow-up this time.</b> ' + esc(e.message) +
+      '<br/>Your answer is saved either way.</div>';
+    acts.classList.remove('hidden');
+    d1Stage = 'followup';
+    document.getElementById('d1-qnext').textContent =
+      d1QI === D1_QUESTIONS.length - 1 ? 'Done — seal it' : 'Next question';
+    document.getElementById('d1-qnext').disabled = false;
+    return;
+  }
+
+  rec.why = res.why || '';
+
+  if (res.withheld || !res.followup) {
+    rec.withheld = !!res.withheld;
+    // The model declining to press is a result worth showing. Most products
+    // would silently ask something anyway.
+    if (res.withheld) {
+      box.innerHTML = '<div class="d1-withheld"><div class="d1-ai-who">No follow-up asked</div>' +
+        '<p>' + esc(res.why || 'There was nothing to ask here that would have been fair to ask.') +
+        '</p></div>';
+    } else {
+      box.innerHTML = '<div class="d1-ai"><div class="d1-ai-who">Nothing to add</div>' +
+        '<div style="font-size:.93rem;line-height:1.7;color:var(--muted)">' +
+        esc(res.why || 'That answer stands on its own.') + '</div></div>';
+    }
+  } else {
+    rec.followup = res.followup;
+    box.innerHTML =
+      '<div class="d1-ai">' +
+        '<div class="d1-ai-who">One follow-up</div>' +
+        '<div class="d1-ai-q">' + esc(res.followup) + '</div>' +
+        '<textarea class="d1-ta" id="d1-fa" style="min-height:5.5rem" ' +
+          'placeholder="Two or three sentences, or skip it."></textarea>' +
+        whyChip(res.why, 'Why it asked this') +
+      '</div>';
+  }
+
+  d1Stage = 'followup';
+  acts.classList.remove('hidden');
+  const btn = document.getElementById('d1-qnext');
+  btn.textContent = d1QI === D1_QUESTIONS.length - 1 ? 'Done — seal it' : 'Next question';
+  btn.disabled = false;
+  const fa = document.getElementById('d1-fa');
+  if (fa) fa.focus();
+  d1Save2();
+}
+
+function d1CloseFollowup() {
+  const fa = document.getElementById('d1-fa');
+  if (fa) d1.answers[d1.answers.length - 1].followupAnswer = fa.value.trim();
+  d1Advance();
+}
+
+function d1Advance() {
+  d1Save2();
+  if (d1QI < D1_QUESTIONS.length - 1) { d1QI++; d1RenderQuestion(); }
+  else d1OpenSeal();
+}
+
+// A sitting in progress is kept as a draft, so closing the tab mid-way does not
+// lose it. It joins `d1All` only once sealed.
+function d1Save2() {
+  d1.updatedAt = new Date().toISOString();
+  try { localStorage.setItem(D1_KEY + '_draft', JSON.stringify(d1)); } catch (e) {}
+}
+
+// ── Step 4 · the seal ─────────────────────────
+function d1OpenSeal() {
+  document.getElementById('d1-seal-name').textContent = d1.to.name || 'they';
+  const name = esc(d1.to.name || 'they');
+  const wait = (d1.to.age != null && d1.to.age < d1.authorAge) ? (d1.authorAge - d1.to.age) : null;
+
+  const opts = [
+    { type: 'age-match', t: 'When ' + name + ' turns ' + d1.authorAge,
+      d: wait != null
+          ? 'In about ' + wait + ' years. They read it at the age you wrote it, so you meet as peers rather than as parent and child.'
+          : 'They read it at the age you are writing it. The point is that you meet as peers.' },
+    { type: 'on-death',  t: 'Only after I am gone',
+      d: 'Released by the people you have named, never by a missed login. One delivery condition among several, not the premise.' },
+    { type: 'date',      t: 'On a particular date',
+      d: 'A birthday, a graduation, an anniversary you already have in mind.' },
+    { type: 'shelf',     t: 'On a shelf, for when they need it',
+      d: 'Labelled and visible, opened when they decide they are ready. The person in difficulty picks the moment, not an algorithm.' }
+  ];
+
+  document.getElementById('d1-trigs').innerHTML = opts.map((o, i) =>
+    '<button type="button" class="d1-trig" id="d1-trig-' + i + '" onclick="d1PickTrigger(' + i + ')">' +
+      '<div class="d1-trig-t">' + o.t + '</div>' +
+      '<div class="d1-trig-d">' + o.d + '</div>' +
+    '</button>').join('');
+
+  d1OpenSeal.opts = opts;
+  d1.trigger = null;
+  document.getElementById('d1-seal-btn').disabled = true;
+  document.getElementById('d1-trig-date-wrap').classList.add('hidden');
+  d1Step(4);
+}
+
+function d1PickTrigger(i) {
+  const o = d1OpenSeal.opts[i];
+  d1OpenSeal.opts.forEach((_, j) =>
+    document.getElementById('d1-trig-' + j).classList.toggle('on', i === j));
+
+  const wrap  = document.getElementById('d1-trig-date-wrap');
+  const input = document.getElementById('d1-trig-date');
+  const label = wrap.querySelector('.d1-label');
+
+  if (o.type === 'date') {
+    input.type = 'date'; label.textContent = 'The date';
+    wrap.classList.remove('hidden');
+  } else if (o.type === 'shelf') {
+    input.type = 'text';
+    input.placeholder = 'for when you want to quit';
+    label.textContent = 'The label on the shelf — ' + esc(d1.to.name || 'they') + ' sees this much';
+    wrap.classList.remove('hidden');
+  } else {
+    wrap.classList.add('hidden');
+  }
+
+  d1.trigger = { type: o.type, label: o.t, value: '' };
+  document.getElementById('d1-seal-btn').disabled = false;
+}
+
+// ── Sealing · the model names the chapter ─────
+async function d1Seal() {
+  const wrap = document.getElementById('d1-trig-date-wrap');
+  if (!wrap.classList.contains('hidden')) {
+    d1.trigger.value = document.getElementById('d1-trig-date').value.trim();
+  }
+  if (d1.trigger.type === 'age-match') d1.trigger.value = String(d1.authorAge);
+
+  const btn = document.getElementById('d1-seal-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sealing…';
+
+  const session = d1.answers.filter(a => !a.skipped).map(a => {
+    let s = 'Q: ' + a.question + '\nA: ' + a.answer;
+    if (a.followup)       s += '\nFollow-up asked: ' + a.followup;
+    if (a.followupAnswer) s += '\nA: ' + a.followupAnswer;
+    return s;
+  }).join('\n\n');
+
+  // Naming is the model's third job and the one the person sees last. If it
+  // fails, the record still seals — it just goes unnamed rather than getting a
+  // title nobody stands behind.
+  try {
+    d1.naming = await d1Call('demo/dispatch-name-prompt.txt', {
+      '{RECIPIENT}': d1.to.name || 'them',
+      '{RELATION}':  d1.to.relation || 'unstated',
+      '{AGE}':       String(d1.authorAge),
+      '{DATE}':      new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      '{SESSION}':   session
+    }, 700);
+    d1.naming.model = D1_MODEL;
+    d1.naming.at = new Date().toISOString();
+  } catch (e) { d1.naming = { error: e.message }; }
+
+  // Drift needs two sittings to the same reader. Never invented on day one.
+  const prior = d1All.filter(x => (x.to.name || '').toLowerCase() === (d1.to.name || '').toLowerCase());
+  const last  = prior[prior.length - 1];
+  if (last) {
+    try {
+      d1.drift = await d1Call('demo/dispatch-drift-prompt.txt', {
+        '{EARLIER_DATE}': new Date(last.createdAt).toLocaleDateString(),
+        '{EARLIER_AGE}':  String(last.authorAge),
+        '{EARLIER}':      d1SessionText(last),
+        '{NOW_DATE}':     new Date().toLocaleDateString(),
+        '{NOW_AGE}':      String(d1.authorAge),
+        '{NOW}':          session
+      }, 500);
+      d1.drift.model = D1_MODEL;
+    } catch (e) { d1.drift = null; }
+  }
+
+  pushRevision(d1.revisions, {
+    answers: d1.answers, to: d1.to, trigger: d1.trigger
+  }, new Date().toISOString());
+
+  d1.sealedAt = new Date().toISOString();
+  d1All.push(d1);
+  d1Save();
+  try { localStorage.removeItem(D1_KEY + '_draft'); } catch (e) {}
+
+  d1RenderLetter(d1);
+  d1Step(5);
+}
+
+function d1SessionText(d) {
+  return d.answers.filter(a => !a.skipped)
+    .map(a => 'Q: ' + a.question + '\nA: ' + a.answer +
+      (a.followupAnswer ? '\nA: ' + a.followupAnswer : '')).join('\n\n');
+}
+
+// ── The sealed object ─────────────────────────
+function d1RenderLetter(d) {
+  const named = d.naming && d.naming.title;
+  const when  = new Date(d.sealedAt || d.createdAt);
+  const next  = new Date(when.getTime() + 30 * 86400000);
+
+  const qa = d.answers.filter(a => !a.skipped).map(a =>
+    '<div class="d1-qa">' +
+      '<div class="d1-qa-q">' + esc(a.question) + '</div>' +
+      '<div class="d1-qa-a">' + esc(a.answer) + '</div>' +
+      (a.followupAnswer
+        ? '<div class="d1-qa-f"><div class="d1-qa-q">' + esc(a.followup) + '</div>' +
+          '<div class="d1-qa-a">' + esc(a.followupAnswer) + '</div></div>'
+        : '') +
+    '</div>').join('');
+
+  let trigLine = d.trigger ? d.trigger.label : '—';
+  if (d.trigger && d.trigger.type === 'date' && d.trigger.value) trigLine = 'On ' + d.trigger.value;
+  if (d.trigger && d.trigger.type === 'shelf' && d.trigger.value) trigLine = '“' + d.trigger.value + '”';
+
+  document.getElementById('d1-out').innerHTML =
+    '<div class="d1-letter">' +
+      '<div class="d1-letter-top">' +
+        '<div class="d1-wax">R</div>' +
+        '<div class="d1-letter-to">Sealed for ' + esc(d.to.name || 'them') +
+          (d.to.relation ? ' · ' + esc(d.to.relation) : '') + '</div>' +
+        '<div class="d1-letter-name">' +
+          (named ? esc(d.naming.title) : 'Unnamed') + '</div>' +
+        (named && d.naming.lede
+          ? '<div class="d1-letter-lede">' + esc(d.naming.lede) + '</div>' : '') +
+        (named ? whyChip(d.naming.why, 'Why it is called this')
+               : '<div class="d1-letter-lede">The naming step did not run' +
+                 (d.naming && d.naming.error ? ' — ' + esc(d.naming.error) : '') +
+                 '. The record is sealed regardless; it would rather go unnamed than ' +
+                 'carry a title nothing stands behind.</div>') +
+      '</div>' +
+      '<dl class="d1-meta">' +
+        '<div><dt>Written at age</dt><dd>' + esc(String(d.authorAge)) + '</dd></div>' +
+        '<div><dt>Date</dt><dd>' + when.toLocaleDateString('en-US',
+            { month: 'short', day: 'numeric', year: 'numeric' }) + '</dd></div>' +
+        '<div><dt>Opens</dt><dd>' + esc(trigLine) + '</dd></div>' +
+        '<div><dt>Version</dt><dd>' + (d.revisions ? d.revisions.length : 1) + '</dd></div>' +
+      '</dl>' +
+      '<div class="d1-letter-body">' + qa + '</div>' +
+    '</div>' +
+
+    '<div class="d1-after">' +
+      (d.drift && d.drift.what
+        ? '<div class="d1-drift"><div class="d1-drift-h">What moved since last time</div>' +
+          '<p>' + esc(d.drift.what) + '</p></div>'
+        : '') +
+      '<div class="d1-recall">' +
+        '<div class="d1-recall-cal"><b>' +
+          next.toLocaleDateString('en-US', { month: 'short' }) + '</b><i>' +
+          next.getDate() + '</i></div>' +
+        '<div><div class="d1-recall-t">You will be asked again on ' +
+          next.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + '</div>' +
+          '<div class="d1-recall-d">Same four questions, same reader. Twelve of these and ' +
+          'you have a year of your life that you never sat down to write — recorded from ' +
+          'inside it rather than remembered afterwards.</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="d1-actions" style="margin-top:1.8rem">' +
+      '<button class="d1-btn" onclick="d1Begin()">Write another</button>' +
+      '<button class="d1-skip" onclick="d1Step(0);d1RenderShelf();d1RenderResume()">Back to the shelf</button>' +
+    '</div>';
+}
+
+// ── The shelf ─────────────────────────────────
+function d1RenderShelf() {
+  const el = document.getElementById('d1-shelf');
+  if (!d1All.length) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = '<div class="d1-shelf-h">' + d1All.length +
+    (d1All.length === 1 ? ' entry so far' : ' entries so far') + '</div>' +
+    d1All.slice().reverse().map(d =>
+      '<button type="button" class="d1-card" onclick="d1Reopen(&quot;' + d.id + '&quot;)">' +
+        '<div class="d1-card-age">' + esc(String(d.authorAge)) + '</div>' +
+        '<div><div class="d1-card-t">' +
+          esc((d.naming && d.naming.title) || 'Unnamed') + '</div>' +
+          '<div class="d1-card-d">For ' + esc(d.to.name || 'them') + ' · ' +
+          new Date(d.sealedAt || d.createdAt).toLocaleDateString('en-US',
+            { month: 'short', day: 'numeric', year: 'numeric' }) + '</div></div>' +
+      '</button>').join('');
+}
+
+function d1Reopen(id) {
+  const d = d1All.find(x => x.id === id);
+  if (!d) return;
+  d1RenderLetter(d);
+  d1Step(5);
+}
+
+// ── The model ─────────────────────────────────
+// Sonnet, not Haiku. Every one of these three calls is a judgment call —
+// what to ask, what not to ask, what to call this — and the quality of that
+// judgment is the only thing the surface is really demonstrating. Haiku stays
+// on the perceptual job (photo curation) where it belongs.
+const D1_MODEL = 'claude-sonnet-5-5';
+
+async function d1Template(file) {
+  if (!d1Tpl[file]) {
+    const r = await fetch(file, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(file.split('/').pop() + ' ' + r.status);
+    d1Tpl[file] = await r.text();
+  }
+  return d1Tpl[file];
+}
+
+async function d1Call(file, subs, maxTokens) {
+  let key = localStorage.getItem('remnant_api_key') || '';
+  if (!key) {
+    key = (prompt('Anthropic API key — stays in your browser, never sent anywhere but api.anthropic.com') || '').trim();
+    if (!key) throw new Error('No API key, so nothing was asked.');
+    localStorage.setItem('remnant_api_key', key);
+  }
+
+  let body = await d1Template(file);
+  Object.keys(subs).forEach(k => { body = body.split(k).join(subs[k]); });
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: D1_MODEL,
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: body }]
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err.error && err.error.message) || 'API error ' + res.status);
+  }
+
+  const data = await res.json();
+  // Name truncation for what it is rather than reporting it as bad JSON.
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('The answer was cut off at the ' + maxTokens + '-token ceiling.');
+  }
+  const text = data.content.map(b => b.text || '').join('');
+  try {
+    return JSON.parse(text.replace(/^```json?\s*|\s*```$/g, '').trim());
+  } catch (e) {
+    throw new Error('The model did not return usable JSON.');
+  }
+}
+
+// ── Wiring ────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function () {
+  const on = (id, ev, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(ev, fn);
+  };
+  on('d1-to',    'input', () => { d1GateReader(); d1GateAge(); });
+  on('d1-toage', 'input', d1GateAge);
+  on('d1-age',   'input', d1GateAge);
+  on('d1-qa',    'input', d1GateAnswer);
+
+});
+
+// A sitting abandoned mid-way is offered back rather than lost to a closed tab.
+// It is not auto-restored: being dropped straight back into question three with
+// no warning is worse than being asked.
+function d1Draft() {
+  try {
+    const raw = localStorage.getItem(D1_KEY + '_draft');
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    return (d && d.answers && d.answers.length) ? d : null;
+  } catch (e) { return null; }
+}
+
+function d1Resume() {
+  const d = d1Draft();
+  if (!d) return;
+  d1 = d;
+  d1QI = Math.min(d.answers.length, D1_QUESTIONS.length - 1);
+  if (d.answers.length >= D1_QUESTIONS.length) { d1OpenSeal(); return; }
+  d1RenderQuestion();
+  d1Step(3);
+}
+
+function d1DiscardDraft() {
+  try { localStorage.removeItem(D1_KEY + '_draft'); } catch (e) {}
+  d1RenderResume();
+}
+
+function d1RenderResume() {
+  const el = document.getElementById('d1-resume');
+  const d = d1Draft();
+  if (!d) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML =
+    '<div class="d1-recall" style="margin-bottom:1.4rem">' +
+      '<div><div class="d1-recall-t">You were part-way through an entry for ' +
+        esc(d.to.name || 'someone') + '</div>' +
+        '<div class="d1-recall-d">' + d.answers.length + ' of four answered, ' +
+        new Date(d.updatedAt).toLocaleDateString('en-US',
+          { month: 'long', day: 'numeric' }) + '.</div>' +
+        '<div class="d1-actions" style="margin-top:.9rem">' +
+          '<button class="d1-btn" onclick="d1Resume()">Pick it up</button>' +
+          '<button class="d1-skip" onclick="d1DiscardDraft()">Start fresh instead</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 }
 
 </script>
