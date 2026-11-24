@@ -42,6 +42,8 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-32 | The model may decline to ask, and that is shown | Settled |
 | T-33 | An unnamed record over a title nothing stands behind | Settled |
 | T-34 | Album extraction reads metadata before it reads pictures | Settled |
+| T-35 | The day-one flow opens on a finished example, not on the ask | Settled |
+| T-36 | Restraint is kept in the sealed record, not just shown live | Settled |
 
 ---
 
@@ -623,3 +625,40 @@ vision version, which is the usual shape of this tradeoff.
 **Revisit when:** §4.3 is resolved. Vision over image content is stage two and should not ship
 before the cloud/local question has an answer, because an album is a far larger disclosure
 than a timeline.
+
+
+## T-35 · The day-one flow opens on a finished example, not on the ask
+**Status:** Settled · v0.16
+
+**Chose:** The opening screen renders a complete sealed record — `demo/example-dispatch.json`,
+an invented person, labelled as such — using the same `d1LetterHtml` component the real thing
+uses. No API key, no ten-minute exercise, nothing to fill in before the artefact is visible.
+**Over:** Leading with "Record today · Ten minutes. Four questions.", which is what shipped
+first and is what the flow asks of someone who has not yet seen why they would.
+**Because:** This is T-11 applied to the second surface. The explorer opens on a populated
+life for exactly this reason and the day-one flow shipped without the same treatment — a
+visitor was asked for ten minutes and a credential before anything demonstrated what they
+would get. Anyone evaluating the product rather than using it leaves at that point, and the
+most important behaviour in the whole project, the model declining to ask, was behind that gate.
+**Costs:** The example is fictional on a page whose credibility rests on the archive being
+real, so it has to be labelled hard and in the same breath — one careless reading and the
+no-reconstruction claim is damaged. It is also one more file that can drift from the product;
+sharing `d1LetterHtml` limits that but does not remove it.
+**Revisit when:** A real first sitting exists to put there instead. An invented example is the
+weaker version of this and should be replaced rather than kept.
+
+## T-36 · Restraint is kept in the sealed record, not just shown live
+**Status:** Settled · v0.16
+
+**Chose:** A withheld follow-up renders inside the sealed letter, carrying the model's reason,
+and answered follow-ups carry the "why it asked this" chip into the record too.
+**Over:** Showing the model's turn only during the sitting, which is what shipped first.
+**Because:** A letter that recorded only the questions the model *did* ask would hide the one
+decision worth seeing, and would make the record a misleading account of how it was made. It
+also means a reader arriving months or decades later can see what was asked of the writer and
+what was deliberately not — which is part of the provenance, not decoration.
+**Costs:** The sealed letter is longer and carries machine commentary into something addressed
+to a person, who may not want the interviewer's notes in their inheritance. A per-record choice
+about whether the model's turn survives into delivery is probably correct and does not exist yet.
+**Revisit when:** Letters are actually delivered. At that point "what the recipient sees" and
+"what the record holds" stop being the same thing and must be separated.

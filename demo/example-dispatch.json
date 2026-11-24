@@ -1,0 +1,68 @@
+{
+  "_note": "A worked example of one day-one sitting, shown on the opening screen so the finished artifact is visible with no key and no ten-minute exercise. The person is invented; the explorer's record is real and the page says which is which. Swap this file to change the example; nothing here is hardcoded in index.html.",
+  "_fictional": true,
+  "id": "example",
+  "createdAt": "2026-10-12T19:40:00.000Z",
+  "sealedAt": "2026-10-12T20:03:00.000Z",
+  "updatedAt": "2026-10-12T20:03:00.000Z",
+  "to": { "name": "Noor", "relation": "my daughter", "age": 6 },
+  "authorAge": 38,
+  "answers": [
+    {
+      "id": "mind",
+      "question": "What is taking up most of your mind right now?",
+      "answer": "My mother goes into assisted living in February and I am the one who has to tell her. My brother says he will come for the move but not for the conversation.",
+      "skipped": false,
+      "followup": "You said your brother will come for the move but not the conversation. Who decided that — him, or the two of you?",
+      "followupAnswer": "Nobody decided it. It settled that way about fifteen years ago and we have both been calling it logistics ever since.",
+      "why": "The division of that work is doing quiet damage; worth asking who chose it.",
+      "withheld": false
+    },
+    {
+      "id": "fine",
+      "question": "What are you pretending to be fine about?",
+      "answer": "The miscarriage in March. I tell people we are fine, and we are mostly fine, and I would like to stop being asked about it.",
+      "skipped": false,
+      "followup": null,
+      "followupAnswer": "",
+      "why": "She has just asked not to be asked. A follow-up here would be extraction, not interest.",
+      "withheld": true
+    },
+    {
+      "id": "know",
+      "question": "What do you want Noor to know about who you are at 38?",
+      "answer": "That I was frightened of nearly everything and did it anyway, and that those are not opposites. Her grandmother believed they were and it cost her most of her twenties.",
+      "skipped": false,
+      "followup": null,
+      "followupAnswer": "",
+      "why": "Specific and finished. A follow-up would only pad it.",
+      "withheld": false
+    },
+    {
+      "id": "deciding",
+      "question": "What are you still deciding?",
+      "answer": "Whether to leave the hospital and go back to teaching. Everyone seems to think I have already decided. I have not.",
+      "skipped": false,
+      "followup": "You said everyone thinks you have decided. What did they see that made them think so?",
+      "followupAnswer": "I applied for one job and mentioned it to three people. I think I wanted to watch their faces when I said it.",
+      "why": "The gap between what she has let people see and what is true is the real question.",
+      "withheld": false
+    }
+  ],
+  "trigger": {
+    "type": "age-match",
+    "label": "When Noor turns 38",
+    "value": "38"
+  },
+  "naming": {
+    "title": "Frightened and moving anyway",
+    "why": "Two of the four answers turn on the same gap — what she has let people see against what is actually true. The name is her own phrasing: she used \"frightened\" and \"did it anyway\" in one sentence and said they are not opposites.",
+    "lede": "At thirty-eight she was carrying two decisions by herself and had let almost no one see either one.",
+    "model": "claude-sonnet-5-5",
+    "at": "2026-10-12T20:03:00.000Z"
+  },
+  "drift": null,
+  "revisions": [
+    { "at": "2026-10-12T20:03:00.000Z", "snapshot": {} }
+  ]
+}
