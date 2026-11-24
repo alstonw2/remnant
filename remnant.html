@@ -1721,6 +1721,50 @@
       .hero-divider { max-width: 300px; }
     }
 
+
+    /* The worked example on the opening screen. Reuses .d1-letter wholesale so
+       it cannot drift from the real thing. */
+    .d1-example { margin-top: 3.2rem; padding-top: 2.4rem; border-top: 1px solid rgba(44,44,44,.1); }
+    .d1-example-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.4rem; }
+    .d1-example-badge {
+      flex: 0 0 auto; margin-top: .15rem;
+      font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--gold); border: 1px solid rgba(184,149,63,.5);
+      border-radius: 1rem; padding: .25rem .6rem;
+    }
+    .d1-example-t { font-family: 'Lora', serif; font-size: 1.15rem; margin-bottom: .35rem; }
+    .d1-example-d { font-size: .9rem; line-height: 1.7; color: var(--muted); max-width: 54ch; }
+    .d1-example-d b { color: var(--ink); font-weight: 600; }
+    .d1-example-note {
+      margin-top: 1.1rem; padding: .9rem 1.1rem;
+      background: rgba(184,149,63,.07); border-left: 2px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      font-size: .88rem; line-height: 1.7; color: var(--muted); max-width: 60ch;
+    }
+    .d1-foot a { color: var(--terra); }
+
+
+    /* Restraint, preserved in the sealed record rather than only shown live. */
+    .d1-qa-held {
+      margin-top: .85rem; padding: .75rem .95rem;
+      background: rgba(184,149,63,.14);
+      border-left: 2px solid var(--gold);
+      border-radius: 0 5px 5px 0;
+      font-size: .87rem; line-height: 1.7; color: rgba(255,255,255,.8);
+    }
+    .d1-qa-held-h {
+      font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: .35rem;
+    }
+
+
+    .ex-decisions {
+      margin-top: 2.2rem; padding-top: 1.4rem;
+      border-top: 1px solid rgba(44,44,44,.08);
+      max-width: 64ch; font-size: .88rem; line-height: 1.75; color: var(--muted);
+    }
+    .ex-decisions a { color: var(--terra); }
+
   </style>
 </head>
 <body>
@@ -1867,10 +1911,26 @@
     <!-- Start your own -->
     <section style="margin-top:4rem;padding-top:2.5rem;border-top:1px solid rgba(44,44,44,.1)">
       <h2 class="ex-section-title">Start yours</h2>
-      <p class="ex-section-sub">One chapter. Pick a trip or a season, and let it choose the photographs that carry it.</p>
+      <p class="ex-section-sub">
+        Not by reconstructing all of this. Four questions about where you are today,
+        addressed to one person — and after enough of them, the shape above.
+      </p>
       <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.2rem;align-items:center">
-        <button class="btn-primary" onclick="openChapters()">Make a chapter</button>
+        <button class="btn-primary" onclick="closeExplore();openDayOne()">Record today</button>
+        <button class="btn-secondary" style="color:var(--muted);border-color:rgba(44,44,44,.2)"
+                onclick="openChapters()">Or make a chapter from photographs</button>
       </div>
+
+      <!-- The register is the strongest part of this project and was previously
+           only reachable by cloning the repository. -->
+      <p class="ex-decisions">
+        Every non-obvious decision behind this page — thirty-six of them, each with the
+        alternative it rejected and the price it paid — is written down in
+        <a href="https://github.com/alstonw2/remnant/blob/main/docs/TRADEOFFS.md" target="_blank" rel="noopener">the tradeoff register</a>,
+        next to <a href="https://github.com/alstonw2/remnant/blob/main/docs/REQUIREMENTS.md" target="_blank" rel="noopener">a specification
+        that names where it contradicts what is actually built</a>. The reasoning chips above
+        are the model's. These are mine.
+      </p>
     </section>
   </div>
 </div>
@@ -2626,20 +2686,49 @@
       <div class="d1-kicker">Begin</div>
       <h1 class="d1-q">There is a version of you<br/>that exists only today.</h1>
       <p class="d1-note">
-        Not the one in your photographs, and not the one anyone will remember. The one
-        in the middle of whatever you are in the middle of. Ten minutes, four questions,
-        one person it is addressed to. You will be asked again in a month, and the
-        month after that — and the record builds itself out of the answers.
+        Not the one in your photographs, and not the one anyone will remember — the one
+        in the middle of whatever you are in the middle of. Four questions, one person it
+        is addressed to, sealed until a condition you choose. Asked again next month, and
+        the month after, until the record has built itself out of the answers.
       </p>
       <div class="d1-actions">
-        <button class="d1-btn" onclick="d1Begin()">Start today's entry</button>
+        <button class="d1-btn" onclick="d1Begin()">Record today's entry</button>
+        <button class="d1-skip" onclick="d1ScrollExample()">Or read one first ↓</button>
       </div>
       <div id="d1-resume" hidden style="margin-top:2rem"></div>
       <div class="d1-shelf" id="d1-shelf" hidden></div>
+
+      <!-- T-11 applied to this surface: show the finished artifact rather than
+           asking for ten minutes and a key before anything is visible. -->
+      <div class="d1-example" id="d1-example" hidden>
+        <div class="d1-example-head">
+          <span class="d1-example-badge">Example</span>
+          <div>
+            <div class="d1-example-t">One sitting, finished</div>
+            <div class="d1-example-d">
+              Ten minutes of someone's evening, sealed for their daughter to open at the
+              age they wrote it. <b>The person is invented</b> — the twenty-eight-year
+              record behind <a href="#" onclick="closeDayOne();openExplore();return false;">See
+              what this becomes</a> is real, and the page says which is which.
+            </div>
+          </div>
+        </div>
+        <div id="d1-example-out"></div>
+        <div class="d1-example-note">
+          Note the second question. The model asked no follow-up there and said why —
+          it is allowed to decline, and the refusal is shown rather than hidden.
+        </div>
+      </div>
+
       <div class="d1-foot">
         Everything stays in this browser. Nothing is uploaded except the words you
-        answer with, and only to generate the follow-up questions —
-        <a href="#" onclick="openExplore();return false;">see what this becomes after twenty-eight years</a>.
+        answer with, and only to generate the follow-up questions.
+        <br/><br/>
+        Every non-obvious decision in this project — thirty-six of them, each with what it
+        cost — is written down in
+        <a href="https://github.com/alstonw2/remnant/blob/main/docs/TRADEOFFS.md" target="_blank" rel="noopener">the tradeoff register</a>,
+        alongside <a href="https://github.com/alstonw2/remnant/blob/main/docs/REQUIREMENTS.md" target="_blank" rel="noopener">a spec
+        that names where it contradicts what is built</a>.
       </div>
     </div>
 
@@ -5122,6 +5211,7 @@ function openDayOne() {
   document.getElementById('d1-badge').hidden = false;
   d1RenderShelf();
   d1RenderResume();
+  d1LoadExample();
   d1Step(0);
   window.scrollTo({ top: 0 });
 }
@@ -5476,18 +5566,32 @@ function d1SessionText(d) {
 }
 
 // ── The sealed object ─────────────────────────
-function d1RenderLetter(d) {
+// Split out from d1RenderLetter so the worked example on the opening screen is
+// the same component, not a mock-up of it. If the letter changes, the example
+// changes with it and cannot quietly drift into advertising.
+function d1LetterHtml(d) {
   const named = d.naming && d.naming.title;
   const when  = new Date(d.sealedAt || d.createdAt);
-  const next  = new Date(when.getTime() + 30 * 86400000);
 
+  // The model's turn is kept in the sealed record, including the times it chose
+  // not to take one. A letter that showed only the follow-ups it did ask would
+  // hide the single most important thing this surface does.
   const qa = d.answers.filter(a => !a.skipped).map(a =>
     '<div class="d1-qa">' +
       '<div class="d1-qa-q">' + esc(a.question) + '</div>' +
       '<div class="d1-qa-a">' + esc(a.answer) + '</div>' +
       (a.followupAnswer
-        ? '<div class="d1-qa-f"><div class="d1-qa-q">' + esc(a.followup) + '</div>' +
-          '<div class="d1-qa-a">' + esc(a.followupAnswer) + '</div></div>'
+        ? '<div class="d1-qa-f">' +
+            '<div class="d1-qa-q">' + esc(a.followup) + '</div>' +
+            '<div class="d1-qa-a">' + esc(a.followupAnswer) + '</div>' +
+            whyChip(a.why, 'Why it asked this') +
+          '</div>'
+        : '') +
+      (a.withheld
+        ? '<div class="d1-qa-held">' +
+            '<div class="d1-qa-held-h">No follow-up asked</div>' +
+            esc(a.why || 'There was nothing to ask here that would have been fair to ask.') +
+          '</div>'
         : '') +
     '</div>').join('');
 
@@ -5495,8 +5599,7 @@ function d1RenderLetter(d) {
   if (d.trigger && d.trigger.type === 'date' && d.trigger.value) trigLine = 'On ' + d.trigger.value;
   if (d.trigger && d.trigger.type === 'shelf' && d.trigger.value) trigLine = '“' + d.trigger.value + '”';
 
-  document.getElementById('d1-out').innerHTML =
-    '<div class="d1-letter">' +
+  return '<div class="d1-letter">' +
       '<div class="d1-letter-top">' +
         '<div class="d1-wax">R</div>' +
         '<div class="d1-letter-to">Sealed for ' + esc(d.to.name || 'them') +
@@ -5519,7 +5622,15 @@ function d1RenderLetter(d) {
         '<div><dt>Version</dt><dd>' + (d.revisions ? d.revisions.length : 1) + '</dd></div>' +
       '</dl>' +
       '<div class="d1-letter-body">' + qa + '</div>' +
-    '</div>' +
+    '</div>';
+}
+
+function d1RenderLetter(d) {
+  const when = new Date(d.sealedAt || d.createdAt);
+  const next = new Date(when.getTime() + 30 * 86400000);
+
+  document.getElementById('d1-out').innerHTML =
+    d1LetterHtml(d) +
 
     '<div class="d1-after">' +
       (d.drift && d.drift.what
@@ -5542,6 +5653,33 @@ function d1RenderLetter(d) {
       '<button class="d1-btn" onclick="d1Begin()">Write another</button>' +
       '<button class="d1-skip" onclick="d1Step(0);d1RenderShelf();d1RenderResume()">Back to the shelf</button>' +
     '</div>';
+}
+
+// ── The worked example ────────────────────────
+// A reviewer should see the finished thing before being asked for ten minutes
+// and an API key. Same decision as T-11, which is why the explorer opens on a
+// populated life; this surface shipped without it.
+let d1Example = null;
+
+async function d1LoadExample() {
+  const host = document.getElementById('d1-example');
+  if (d1Example) return;
+  try {
+    const r = await fetch('demo/example-dispatch.json', { cache: 'no-cache' });
+    if (!r.ok) throw new Error('example-dispatch.json ' + r.status);
+    d1Example = await r.json();
+  } catch (e) {
+    host.hidden = true;   // no example is better than a broken one
+    console.warn('Remnant: example unavailable —', e.message);
+    return;
+  }
+  document.getElementById('d1-example-out').innerHTML = d1LetterHtml(d1Example);
+  host.hidden = false;
+}
+
+function d1ScrollExample() {
+  const el = document.getElementById('d1-example');
+  if (el && !el.hidden) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── The shelf ─────────────────────────────────
