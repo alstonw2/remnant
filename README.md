@@ -1,31 +1,56 @@
 # Remnant
 
-*Your wishes, your traditions, your legacy — all in one place.*
+*Everyone who will ever know you arrives mid-story.*
 
-Remnant is a side project exploring the mortality space: a gentle, guided product
-for recording how you want to be cared for, which traditions you want upheld, and
-how you want to be remembered.
+Your children will meet you tired, formed, already decided. They will never meet the
+person figuring it out right now — and you are the only witness to that version who could
+ever write it down.
+
+Remnant records the present tense of a life, addressed to one named person, released on a
+condition you choose. **Death is one delivery trigger, not the premise.**
+
+**Live:** [alstonwang.com/remnant.html](https://alstonwang.com/remnant.html)
+
+> The interesting part of this project is not the features. It is
+> [`docs/TRADEOFFS.md`](docs/TRADEOFFS.md) — thirty-four decisions with the cost each one
+> paid — and [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md) §4.3, which is a section
+> explaining where the stated requirements contradict what is actually built.
 
 ## Features
 
-**The explorer** — the page opens on a complete life you can explore immediately, with no
-input and no API key: a draggable timeline across four eras, chapters, letters with their
-delivery conditions, traditions, and the moments in between. Every decision the AI made is
-shown with its reasoning and can be overruled — which frames it kept and why, which
-achievements it promoted, which it deliberately left in the archive, and why a question
-about the person returns nothing when they never wrote about it.
+**The day-one flow** — the product. Four present-tense questions, one sitting, addressed to
+one person by name, sealed behind a delivery trigger. Answer them again next month and the
+month after, and the record accumulates without anyone ever sitting down to write a life.
 
-The whole demo life is `demo/life.json`. Swap that one file for your own record and the
+The model has three jobs here, all of them judgment calls, all of them visible:
+
+1. **It asks one follow-up**, built from a specific noun the person used. The prompt forbids
+   feeling-labels, lesson-extraction, and summarising the answer back.
+2. **It names the chapter** — a title drawn from the person's own words, with its reasoning.
+3. **It may decline to ask.** When an answer discloses acute distress, the model returns no
+   question at all and says why. The refusal renders as a card of its own rather than as
+   silence (T-32). Most AI features demonstrate a model generating more; this one shows it
+   stopping.
+
+If the naming call fails, the record seals **unnamed** rather than inventing a title (T-33) —
+the same fail-closed rule as T-15.
+
+Entries are stamped with the author's age at the time of writing, not just the date, so an
+age-matched delivery — *your daughter reads this at the age you wrote it* — needs no backfill.
+
+**The explorer** — not the product; the exhibit of what the flow produces after years of it.
+A complete life, explorable with no input and no API key: a draggable timeline across five
+eras, chapters, learnings, a life map filtered by the same scrubber, and the moments in
+between. Every AI decision is shown with its reasoning and can be overruled — which frames it
+kept, which achievements it promoted, and which it deliberately left in the archive.
+
+The page states plainly that this record was **assembled backwards** — twenty-eight years
+reconstructed over several weeks, half of it remembered rather than recorded. That is not a
+confession to bury; it is the argument for the day-one flow, because the reconstruction took
+long enough that almost nobody would do it.
+
+The whole demo life is `demo/alston.json`. Swap that one file for your own record and the
 explorer re-renders; nothing about the demo person is hardcoded in `index.html`.
-
-A single **life map** sits above the timeline holding every place in the record, filtered
-by the same scrubber — drag to 2009 and only the places that existed by then remain. Pins
-open their entry.
-
-Every experience carries a **learning** — advice to a younger self, a reflection, or
-something for whoever comes after. These render in the person's own voice, visually
-distinct from the model's reasoning; they are indexed by the voice lookup and weighted
-when the model ranks defining moments.
 
 Era grouping and achievement ranking are real inference, not authored copy. Derive them
 once from the command line and the result is baked into the published record:
@@ -55,15 +80,18 @@ date it was derived, and the "Re-derive with AI" button still runs it live for a
 a key. Both paths compose the same prompt from `demo/derive-prompt.txt`. The call uses
 Sonnet rather than the Haiku used for photo curation — see `docs/TRADEOFFS.md` T-16, T-24.
 
-**Guided life profile** — a 4-step flow covering medical directives, traditions and legacy
-messages. No longer part of the demo flow (T-17); still built, still works, reachable at
-`/remnant.html#plan`:
+**Guided life profile** — *superseded, kept for the record.* This was the original product:
+a 4-step form covering medical directives, traditions and legacy messages. It was taken out
+of the demo flow (T-17) and then superseded entirely by the day-one flow (T-30), because a
+form asking someone to document their life is the reason records like this never get
+written. Still built, still works, unlinked but reachable at `/remnant.html#plan`:
 1. The basics & cultural identity
 2. Care preferences (living will, medical power of attorney, after-death wishes)
 3. Family traditions & heritage worth preserving
 4. Legacy messages, including time-locked letters delivered at life milestones
 
-**Chapters — AI photo stories** — upload photos from a trip or season of life;
+**Chapters — AI photo stories** — *a demonstration, not a third way in.* Upload photos from a
+trip or season of life;
 star the ones you want highlighted, then Claude selects the handful that best
 tell the story and writes the narrative connecting them. Presented as an
 interactive, playable slideshow with collage slides, an interactive map of
@@ -71,6 +99,9 @@ where it happened, and full inline editing (rewrite text, reorder slides,
 drop your own map pins).
 
 ## Where this is going
+
+Nothing below is built. It is written down so the reasoning survives, and so the gap between
+what is claimed and what exists stays visible.
 
 `docs/REQUIREMENTS.md` holds the forward-looking spec — age-matched delivery, mutual blind
 disclosure, zero-knowledge custody with multi-guardian key sharding — and records where those
@@ -81,15 +112,24 @@ decisions already made and what each one cost.
 
 - Single static `index.html` — no build step, no framework
 - Photos are downscaled to 768px in the browser before anything is sent
-- AI curation calls the Claude API (Haiku) directly from the browser with a
-  user-supplied API key (BYOK — stored only in localStorage, never on a server)
+- AI calls go to the Claude API directly from the browser with a user-supplied key
+  (BYOK — stored only in localStorage, never on a server). Two models by task:
+  **Haiku** for photo curation, which is perceptual, and **Sonnet** for every judgment
+  call — era derivation, ranking, and all three of the day-one flow's jobs (T-16)
+- Every prompt lives in `demo/*.txt` and is read by both the browser and the CLI, so the
+  button and the command line cannot drift apart (T-24)
 - One batched API request per chapter (~$0.04 for 30 photos)
 - Saved example chapters are static JSON in `chapters/` — visitors view them at
   zero API cost
-- Profile data persists in localStorage (`remnant_v2`); no accounts, no tracking
-- Letters and traditions are *entries* — `{ to, trigger, fields, revisions }` — and
-  every reflective field keeps append-only revision history, one version per
-  editing session. See `docs/TRADEOFFS.md` (T-01 to T-06) for why.
+- Two localStorage stores, deliberately separate (T-31): `remnant_dispatch_v1` for
+  day-one records, `remnant_v2` for the guided profile. The profile store is read back
+  out of the DOM, so it only exists coherently while that flow is on screen — a failed
+  first sitting must not be able to damage a record someone has kept for years. Both
+  share `pushRevision`, so revision semantics cannot drift apart.
+- Letters, traditions and day-one records are all *entries* — `{ to, trigger, fields,
+  revisions }` — and every reflective field keeps append-only revision history, one
+  version per editing session. See `docs/TRADEOFFS.md` (T-01 to T-06) for why.
+- No accounts, no tracking, no server. The only outbound request is to the Claude API.
 
 ## Run locally
 
