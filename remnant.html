@@ -1735,6 +1735,16 @@
     .d1-example-t { font-family: 'Lora', serif; font-size: 1.15rem; margin-bottom: .35rem; }
     .d1-example-d { font-size: .9rem; line-height: 1.7; color: var(--muted); max-width: 54ch; }
     .d1-example-d b { color: var(--ink); font-weight: 600; }
+    /* btn-secondary is styled for the dark hero; on this cream surface its white
+       text and white border render as nothing at all. */
+    .d1-example-open {
+      margin: .4rem 0 1.6rem;
+      color: var(--ink);
+      border-color: rgba(44,44,44,.25);
+    }
+    .d1-example-open:hover {
+      background: var(--green); color: #fff; border-color: var(--green);
+    }
     .d1-example-note {
       margin-top: 1.1rem; padding: .9rem 1.1rem;
       background: rgba(184,149,63,.07); border-left: 2px solid var(--gold);
@@ -1755,6 +1765,20 @@
     .d1-qa-held-h {
       font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
       color: var(--gold); margin-bottom: .35rem;
+    }
+
+    /* The author's own refusal, kept the same way the model's is (T-40). */
+    .d1-qa-dec {
+      padding: .6rem .85rem;
+      background: rgba(255,255,255,.05);
+      border-left: 2px solid rgba(255,255,255,.28);
+      border-radius: 0 5px 5px 0;
+      font-size: .87rem; line-height: 1.7; color: rgba(255,255,255,.62);
+      font-style: italic;
+    }
+    .d1-qa-dec-h {
+      font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+      color: rgba(255,255,255,.5); margin-bottom: .3rem; font-style: normal;
     }
 
 
@@ -1924,7 +1948,7 @@
       <!-- The register is the strongest part of this project and was previously
            only reachable by cloning the repository. -->
       <p class="ex-decisions">
-        Every non-obvious decision behind this page — thirty-six of them, each with the
+        Every non-obvious decision behind this page — forty-one of them, each with the
         alternative it rejected and the price it paid — is written down in
         <a href="https://github.com/alstonw2/remnant/blob/main/docs/TRADEOFFS.md" target="_blank" rel="noopener">the tradeoff register</a>,
         next to <a href="https://github.com/alstonw2/remnant/blob/main/docs/REQUIREMENTS.md" target="_blank" rel="noopener">a specification
@@ -2706,17 +2730,24 @@
           <div>
             <div class="d1-example-t">One sitting, finished</div>
             <div class="d1-example-d">
-              Ten minutes of someone's evening, sealed for their daughter to open at the
-              age they wrote it. <b>The person is invented</b> — the twenty-eight-year
-              record behind <a href="#" onclick="closeDayOne();openExplore();return false;">See
-              what this becomes</a> is real, and the page says which is which.
+              Ten minutes of a Tuesday evening, sealed until a birthday. <b>This one is
+              real</b> — my own answers, run through the prompts this page ships with,
+              addressed to myself at thirty. Nothing in it was written to be read by you.
             </div>
           </div>
         </div>
-        <div id="d1-example-out"></div>
-        <div class="d1-example-note">
-          Note the second question. The model asked no follow-up there and said why —
-          it is allowed to decline, and the refusal is shown rather than hidden.
+        <!-- One more click to get in. A sealed letter that renders itself the
+             moment the page loads is not sealed, and reading someone's real
+             answers should be a thing you choose to do (T-41). -->
+        <button class="btn-secondary d1-example-open" id="d1-example-open"
+                onclick="d1OpenExample()">Open the letter</button>
+        <div id="d1-example-body" hidden>
+          <div id="d1-example-out"></div>
+          <div class="d1-example-note">
+            Note the second question: the model asked no follow-up and said why. Note the
+            third: it asked, and I declined to answer. Both are kept. A record that only
+            showed the exchanges that went well would be advertising.
+          </div>
         </div>
       </div>
 
@@ -2724,7 +2755,7 @@
         Everything stays in this browser. Nothing is uploaded except the words you
         answer with, and only to generate the follow-up questions.
         <br/><br/>
-        Every non-obvious decision in this project — thirty-six of them, each with what it
+        Every non-obvious decision in this project — forty-one of them, each with what it
         cost — is written down in
         <a href="https://github.com/alstonw2/remnant/blob/main/docs/TRADEOFFS.md" target="_blank" rel="noopener">the tradeoff register</a>,
         alongside <a href="https://github.com/alstonw2/remnant/blob/main/docs/REQUIREMENTS.md" target="_blank" rel="noopener">a spec
@@ -5529,22 +5560,11 @@ async function d1Seal() {
     d1.naming.at = new Date().toISOString();
   } catch (e) { d1.naming = { error: e.message }; }
 
-  // Drift needs two sittings to the same reader. Never invented on day one.
-  const prior = d1All.filter(x => (x.to.name || '').toLowerCase() === (d1.to.name || '').toLowerCase());
-  const last  = prior[prior.length - 1];
-  if (last) {
-    try {
-      d1.drift = await d1Call('demo/dispatch-drift-prompt.txt', {
-        '{EARLIER_DATE}': new Date(last.createdAt).toLocaleDateString(),
-        '{EARLIER_AGE}':  String(last.authorAge),
-        '{EARLIER}':      d1SessionText(last),
-        '{NOW_DATE}':     new Date().toLocaleDateString(),
-        '{NOW_AGE}':      String(d1.authorAge),
-        '{NOW}':          session
-      }, 500);
-      d1.drift.model = D1_MODEL;
-    } catch (e) { d1.drift = null; }
-  }
+  // Drift compares this sitting against an earlier *sealed* one. Under §4.3 the
+  // seal is the boundary and nothing crosses it toward a model on its own — the
+  // author may re-open their own record, but it has to be their act, not ours.
+  // So this is offered on the finished letter and never runs at seal time (T-38).
+  d1.drift = null;
 
   pushRevision(d1.revisions, {
     answers: d1.answers, to: d1.to, trigger: d1.trigger
@@ -5557,6 +5577,44 @@ async function d1Seal() {
 
   d1RenderLetter(d1);
   d1Step(5);
+}
+
+// Is there an earlier sealed sitting to the same reader?
+function d1HasPrior(d) {
+  return d1All.some(x => x.id !== d.id &&
+    (x.to.name || '').toLowerCase() === (d.to.name || '').toLowerCase() &&
+    Date.parse(x.sealedAt || x.createdAt) < Date.parse(d.sealedAt || d.createdAt));
+}
+
+// Only ever reached by the author pressing the button. §4.3, T-38.
+async function d1Compare(id) {
+  const d = d1All.find(x => x.id === id);
+  if (!d) return;
+  const prior = d1All.filter(x => x.id !== d.id &&
+    (x.to.name || '').toLowerCase() === (d.to.name || '').toLowerCase() &&
+    Date.parse(x.sealedAt || x.createdAt) < Date.parse(d.sealedAt || d.createdAt));
+  const last = prior[prior.length - 1];
+  if (!last) return;
+
+  const box = document.getElementById('d1-drift-offer');
+  box.innerHTML = '<div class="d1-thinking"><span></span><span></span><span></span>' +
+                  'Reading both…</div>';
+  try {
+    d.drift = await d1Call('demo/dispatch-drift-prompt.txt', {
+      '{EARLIER_DATE}': new Date(last.sealedAt || last.createdAt).toLocaleDateString(),
+      '{EARLIER_AGE}':  String(last.authorAge),
+      '{EARLIER}':      d1SessionText(last),
+      '{NOW_DATE}':     new Date(d.sealedAt || d.createdAt).toLocaleDateString(),
+      '{NOW_AGE}':      String(d.authorAge),
+      '{NOW}':          d1SessionText(d)
+    }, 500);
+    d.drift.model = D1_MODEL;
+    d1Save();
+  } catch (e) {
+    box.innerHTML = '<div class="d1-drift-h">Could not compare</div><p>' + esc(e.message) + '</p>';
+    return;
+  }
+  d1RenderLetter(d);
 }
 
 function d1SessionText(d) {
@@ -5580,10 +5638,18 @@ function d1LetterHtml(d) {
     '<div class="d1-qa">' +
       '<div class="d1-qa-q">' + esc(a.question) + '</div>' +
       '<div class="d1-qa-a">' + esc(a.answer) + '</div>' +
-      (a.followupAnswer
+      (a.followup && (a.followupAnswer || a.declined)
         ? '<div class="d1-qa-f">' +
             '<div class="d1-qa-q">' + esc(a.followup) + '</div>' +
-            '<div class="d1-qa-a">' + esc(a.followupAnswer) + '</div>' +
+            (a.followupAnswer
+              ? '<div class="d1-qa-a">' + esc(a.followupAnswer) + '</div>'
+              // A question the author declined is kept as declined. Dropping it
+              // would make the record look like one where everything got
+              // answered, which is not the record that was written (T-40).
+              : '<div class="d1-qa-dec">' +
+                  '<div class="d1-qa-dec-h">Left unanswered</div>' +
+                  'The question was asked. Declining it is part of what was recorded.' +
+                '</div>') +
             whyChip(a.why, 'Why it asked this') +
           '</div>'
         : '') +
@@ -5636,7 +5702,16 @@ function d1RenderLetter(d) {
       (d.drift && d.drift.what
         ? '<div class="d1-drift"><div class="d1-drift-h">What moved since last time</div>' +
           '<p>' + esc(d.drift.what) + '</p></div>'
-        : '') +
+        : d1HasPrior(d)
+          ? '<div class="d1-drift" id="d1-drift-offer">' +
+              '<div class="d1-drift-h">An earlier entry exists for ' + esc(d.to.name || 'them') + '</div>' +
+              '<p>Comparing them means unsealing the earlier one and sending both to the model. ' +
+              'That is your decision to make, not something this does on your behalf.</p>' +
+              '<div class="d1-actions" style="margin-top:.9rem">' +
+                '<button class="d1-btn" onclick="d1Compare(&quot;' + d.id + '&quot;)">Unseal it and compare</button>' +
+              '</div>' +
+            '</div>'
+          : '') +
       '<div class="d1-recall">' +
         '<div class="d1-recall-cal"><b>' +
           next.toLocaleDateString('en-US', { month: 'short' }) + '</b><i>' +
@@ -5673,14 +5748,27 @@ async function d1LoadExample() {
     console.warn('Remnant: example unavailable —', e.message);
     return;
   }
+  host.hidden = false;   // the invitation shows; the letter waits for a click
+}
+
+// Deliberately a second action, not an auto-reveal. See the comment on the
+// markup: opening someone's record is a decision, including here (T-41).
+function d1OpenExample() {
+  if (!d1Example) return;
+  const body = document.getElementById('d1-example-body');
+  const btn  = document.getElementById('d1-example-open');
+  if (!body.hidden) return;
   document.getElementById('d1-example-out').innerHTML = d1LetterHtml(d1Example);
-  host.hidden = false;
+  body.hidden = false;
+  btn.hidden = true;
 }
 
 function d1ScrollExample() {
   const el = document.getElementById('d1-example');
   if (el && !el.hidden) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// CSS for the gate lives with the rest of the example block.
 
 // ── The shelf ─────────────────────────────────
 function d1RenderShelf() {

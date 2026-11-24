@@ -46,6 +46,9 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-36 | Restraint is kept in the sealed record, not just shown live | Settled |
 | T-37 | The seal is the privacy boundary, not the product | Settled |
 | T-38 | Drift is an explicit act by the author, never automatic | Settled |
+| T-39 | The follow-up turns on the subject, not the most concrete noun | Settled |
+| T-40 | A follow-up the author declines is kept as declined | Settled |
+| T-41 | The example letter waits for a second click | Settled |
 
 ---
 
@@ -711,3 +714,73 @@ button carrying a deliberately off-putting sentence. Fewer people will see the f
 justifies coming back. That is the correct trade and it is still a real cost.
 **Revisit when:** Capsules are actually encrypted. The question then becomes whether an author
 re-opening their own capsule should need to re-authenticate, which is a different decision.
+
+
+## T-39 · The follow-up turns on the subject, not on the most concrete noun
+**Status:** Settled · v0.16
+
+**Chose:** `dispatch-followup-prompt.txt` now says to find what the answer is *about* before
+finding something specific inside it, and names the failure directly: a date, age, place or
+person used as a comparison is a frame the writer built to say something else with.
+**Over:** The original instruction — "turn on a specific noun, name, place or moment the person
+used themselves" — which is what shipped and which reads well until it meets real writing.
+**Because:** Caught by the first real sitting. Someone wrote that their parents had a child at
+26 and that they are 28 and not where they wanted to be; the model asked what the parents were
+doing at 28. It wrote that it felt young three years ago and still does; the model asked what
+it was doing three years ago. Both questions turned on the most concrete token available and
+both missed the subject entirely — the author called them irrelevant, and they were. A
+follow-up that asks about the measuring stick rather than the thing being measured reads as
+not having listened, which is worse than asking nothing (T-32).
+**Costs:** "Find the subject" is a vaguer instruction than "turn on a specific noun", and vaguer
+instructions are harder to hold a model to; expect more variance. It also makes the restraint
+path more attractive to the model than it should be, since declining is now the easier way to
+satisfy a harder rule.
+**Revisit when:** Enough real sittings exist to see whether follow-up quality or the withhold
+rate moved. If withholds climb, the rule overcorrected.
+
+
+## T-40 · A follow-up the author declines is kept as declined
+**Status:** Settled · v0.16
+
+**Chose:** When the model asks a follow-up and the author chooses not to answer it, the sealed
+letter renders the question with an explicit **Left unanswered** card — the question, the
+model's reasoning for asking it, and the fact that it was turned down.
+**Over:** Dropping the exchange, which is what the code did until now. An unanswered follow-up
+rendered as nothing at all, so the letter looked like one where every question got an answer.
+**Because:** This is T-36 pointed the other way. T-36 kept the model's restraint in the record;
+this keeps the author's. Both exist because the interesting content of a sitting is where it
+stopped, and both failure modes are the same failure mode — a record that quietly edits itself
+into a cleaner record than the one that was written. Caught the same way as T-36 and T-39: by
+actually sitting down and answering, and then declining one. The real example now ships with
+one withhold by the model and one refusal by the author, which is a more honest demonstration
+than four clean exchanges.
+**Costs:** Three of four questions in the shipped example now carry some form of negative space,
+which makes the surface read as more fraught than a first sitting usually is. A visitor skimming
+may read the gold and grey cards as errors rather than as the point. The note under the letter
+has to do the work of explaining that, and notes explaining a design are a sign the design is
+not self-evident.
+**Revisit when:** The shelf holds enough real sittings to tell whether declining is common or
+whether this example is unrepresentative.
+
+
+## T-41 · The example letter waits for a second click
+**Status:** Settled · v0.16
+
+**Chose:** The opening screen shows the invitation — what the example is, whose it is, that it
+is real — and the letter itself renders only when someone presses **Open the letter**.
+**Over:** Rendering it on load, which is what T-35 shipped and what every instinct about
+reducing friction says to do.
+**Because:** Two reasons, and the second is the one that matters. The practical one: an unasked-for
+wall of someone's interior life is not an onboarding screen, and a visitor who has not decided
+to read it yet has no way to not read it. The real one: this product's entire claim is that a
+sealed record is opened by a deliberate act, by one named person, at one moment. A page that
+demonstrates that claim by auto-playing the contents of a sealed letter contradicts itself in
+the first second. The click is small, and it is the product's own thesis applied to its own
+demo.
+**Costs:** Directly against T-11 and T-35, which say to lead with the populated artifact rather
+than the ask. Some visitors will not click, and they will leave having seen a description of the
+example instead of the example. That is a measurable loss of the thing the example was added to
+fix. It is accepted because the alternative teaches the wrong lesson about the product in the
+same breath as demonstrating it.
+**Revisit when:** The invitation copy can be tested. If the click-through is poor, the fix is
+better copy above the button, not removing the button.

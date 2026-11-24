@@ -17,7 +17,11 @@ Ask nothing when either is true:
 
 When you do ask, the question must:
   - be answerable in two or three sentences
-  - turn on a specific noun, name, place or moment the person used themselves
+  - turn on something the answer is actually ABOUT, not merely the most concrete
+    thing in it. A date, an age, a place or a person used as a comparison or a
+    measuring stick is a frame the person built to say something else with. Asking
+    about the frame reads as not having listened. Find the subject first, then find
+    a specific thing inside the subject.
   - ask what happened, or what they thought at the time
   - never ask them to name a feeling, extract a lesson, or say what they learned
   - never flatter, never summarise their answer back to them, and never open with

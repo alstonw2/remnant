@@ -1,68 +1,90 @@
 {
-  "_note": "A worked example of one day-one sitting, shown on the opening screen so the finished artifact is visible with no key and no ten-minute exercise. The person is invented; the explorer's record is real and the page says which is which. Swap this file to change the example; nothing here is hardcoded in index.html.",
-  "_fictional": true,
+  "_note": "A real sitting, shown on the day-one opening screen so the finished artifact is visible without a key. The answers are Alston Wang's own words, written 2026-11-24 and split across the four questions by the paragraphs he wrote them in. The model's turn — the three follow-ups, the withheld one, and the naming — was produced by applying demo/dispatch-followup-prompt.txt and demo/dispatch-name-prompt.txt verbatim, in a Claude Code session rather than by the deployed page. Same prompts, same model family, different runner; recorded here because the page claims nothing is reconstructed.",
+  "_fictional": false,
   "id": "example",
-  "createdAt": "2026-10-12T19:40:00.000Z",
-  "sealedAt": "2026-10-12T20:03:00.000Z",
-  "updatedAt": "2026-10-12T20:03:00.000Z",
-  "to": { "name": "Noor", "relation": "my daughter", "age": 6 },
-  "authorAge": 38,
+  "createdAt": "2026-11-24T00:00:00.000Z",
+  "sealedAt": "2026-11-24T00:00:00.000Z",
+  "updatedAt": "2026-11-24T00:00:00.000Z",
+  "to": {
+    "name": "Alston",
+    "relation": "myself at thirty",
+    "age": 30
+  },
+  "authorAge": 28,
   "answers": [
     {
       "id": "mind",
       "question": "What is taking up most of your mind right now?",
-      "answer": "My mother goes into assisted living in February and I am the one who has to tell her. My brother says he will come for the move but not for the conversation.",
+      "answer": "It's a terrifying thought to think about how my parents gave birth to my sister at the age of 26. I am 28 now, and I am not where I want to be in life. I recognize I am fortunate to have family, friends, and a community, but sometimes I feel like an impostor hiding amongst the crowd. I have formed bad habits and insecurities that I am working on, and I hope the version of me when I turn 30 can say I am proud to eliminate those from my life.",
       "skipped": false,
-      "followup": "You said your brother will come for the move but not the conversation. Who decided that — him, or the two of you?",
-      "followupAnswer": "Nobody decided it. It settled that way about fifteen years ago and we have both been calling it logistics ever since.",
-      "why": "The division of that work is doing quiet damage; worth asking who chose it.",
-      "withheld": false
+      "followup": "You wrote that you hope you can say you eliminated them. Which one are you least sure about?",
+      "followupAnswer": "I am writing to keep myself accountable for eliminating bad habits.",
+      "why": "He named the habits in the plural and the hope in the singular; the gap is where the work is.",
+      "withheld": false,
+      "declined": false
     },
     {
       "id": "fine",
       "question": "What are you pretending to be fine about?",
-      "answer": "The miscarriage in March. I tell people we are fine, and we are mostly fine, and I would like to stop being asked about it.",
+      "answer": "After the recent layoffs, I have been keeping my head high, putting my best foot forward. But those are days that I get up and feel directionless, and those are probably the darkest days. However, I look back at my life and the gratitude of being in this position keeps me going, searching for higher purposes.",
       "skipped": false,
       "followup": null,
       "followupAnswer": "",
-      "why": "She has just asked not to be asked. A follow-up here would be extraction, not interest.",
-      "withheld": true
+      "why": "The layoffs are recent and he is still inside this one; those days are not material to mine.",
+      "withheld": true,
+      "declined": false
     },
     {
       "id": "know",
-      "question": "What do you want Noor to know about who you are at 38?",
-      "answer": "That I was frightened of nearly everything and did it anyway, and that those are not opposites. Her grandmother believed they were and it cost her most of her twenties.",
+      "question": "What do you want Alston to know about who you are at 28?",
+      "answer": "The 28-year-old today version of me is lost, but proud to be lost, because I can fantasize about the kind of life I want to live in the future, and work towards the goal. I felt young three years ago, and I still feel young today.",
       "skipped": false,
-      "followup": null,
+      "followup": "You said you can fantasize about the kind of life you want. What's in it?",
       "followupAnswer": "",
-      "why": "Specific and finished. A follow-up would only pad it.",
-      "withheld": false
+      "why": "Pride in being lost rests on the fantasy; he described the pride but never the fantasy.",
+      "withheld": false,
+      "declined": true
     },
     {
       "id": "deciding",
       "question": "What are you still deciding?",
-      "answer": "Whether to leave the hospital and go back to teaching. Everyone seems to think I have already decided. I have not.",
+      "answer": "I am still deciding whether to relocate from Seattle to NYC for a clean restart. My family has gotten my back all these years, and perhaps it's my turn to give back.",
       "skipped": false,
-      "followup": "You said everyone thinks you have decided. What did they see that made them think so?",
-      "followupAnswer": "I applied for one job and mentioned it to three people. I think I wanted to watch their faces when I said it.",
-      "why": "The gap between what she has let people see and what is true is the real question.",
-      "withheld": false
+      "followup": "You called it a clean restart. What is it in Seattle you would be restarting from?",
+      "followupAnswer": "I have been living selfishly for myself the last five years. Now it's time to give back to those who gave to me.",
+      "why": "He named where he would go and called it clean, but not what he would be leaving.",
+      "withheld": false,
+      "declined": false
     }
   ],
   "trigger": {
-    "type": "age-match",
-    "label": "When Noor turns 38",
-    "value": "38"
+    "type": "date",
+    "label": "When I turn 30",
+    "value": ""
   },
   "naming": {
-    "title": "Frightened and moving anyway",
-    "why": "Two of the four answers turn on the same gap — what she has let people see against what is actually true. The name is her own phrasing: she used \"frightened\" and \"did it anyway\" in one sentence and said they are not opposites.",
-    "lede": "At thirty-eight she was carrying two decisions by herself and had let almost no one see either one.",
+    "title": "Proud to be lost",
+    "why": "Three of the four answers circle the same gap between where he is and where he assumed he would be by now — his parents at 26, the impostor among the crowd, a restart he has not taken. The name is his own phrasing: he wrote \"lost, but proud to be lost\", and the pride is carrying as much weight in that sentence as the lostness.",
+    "lede": "At twenty-eight, in the months after the layoffs, he was measuring himself against his parents at twenty-six and had decided that being lost was not the same as being stuck.",
     "model": "claude-sonnet-5-5",
-    "at": "2026-10-12T20:03:00.000Z"
+    "at": "2026-11-24T00:00:00.000Z"
   },
   "drift": null,
   "revisions": [
-    { "at": "2026-10-12T20:03:00.000Z", "snapshot": {} }
-  ]
+    {
+      "at": "2026-11-24T00:00:00.000Z",
+      "snapshot": {}
+    }
+  ],
+  "_rejectedFollowups": [
+    {
+      "for": "mind",
+      "question": "You chose 26 as the comparison. What were your parents doing at 28 — the age you are now?"
+    },
+    {
+      "for": "know",
+      "question": "You said you felt young three years ago. What were you doing then?"
+    }
+  ],
+  "_rejectedNote": "These two were the first follow-ups the prompt generated, and the author rejected both as irrelevant. Each turned on a number he had used as a measuring stick rather than on what he was measuring. The prompt was corrected (TRADEOFFS T-39) and re-run; the questions below are the second attempt."
 }
