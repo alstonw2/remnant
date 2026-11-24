@@ -1677,6 +1677,50 @@
       .d1-meta { gap: .8rem 1.1rem; }
       .d1-letter-top, .d1-meta, .d1-letter-body { padding-left: 1.3rem; padding-right: 1.3rem; }
     }
+
+    /* Landing — the archive is shown as a consequence of the flow above it,
+       so it needs a seam and a caveat rather than equal billing. */
+    .hero-divider {
+      display: flex; align-items: center; gap: 1rem;
+      width: 100%; max-width: 420px; margin: 2.8rem auto 1.4rem;
+      color: rgba(255,255,255,.4); font-size: .76rem; letter-spacing: .04em;
+    }
+    .hero-divider::before, .hero-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.16);
+    }
+    .hero-caveat {
+      max-width: 44ch; margin: 1.1rem auto 0;
+      font-size: .82rem; line-height: 1.7;
+      color: rgba(255,255,255,.42);
+    }
+    .hero-aside {
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      margin-top: 2.2rem; padding: .4rem;
+      color: rgba(255,255,255,.4); font-size: .84rem;
+      transition: color .2s;
+    }
+    .hero-aside:hover { color: rgba(255,255,255,.75); }
+
+    /* The same caveat inside the explorer, for anyone who arrives straight at it. */
+    .ex-caveat {
+      max-width: 62ch; margin: 0 0 1.8rem;
+      padding: .9rem 1.1rem;
+      background: rgba(184,149,63,.08);
+      border-left: 2px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      font-size: .87rem; line-height: 1.7; color: var(--muted);
+    }
+    .ex-caveat b { color: var(--ink); font-weight: 600; }
+
+
+    /* The back-link is absolutely positioned and collides with the centred
+       logo mark once the viewport is narrow enough. */
+    @media (max-width: 560px) {
+      .site-return { top: 1.1rem; left: 1.1rem; font-size: .8rem; }
+      #landing .logo-mark { margin-top: 2.2rem; margin-bottom: 2.4rem; }
+      .hero-divider { max-width: 300px; }
+    }
+
   </style>
 </head>
 <body>
@@ -1692,11 +1736,25 @@
     A life is more<br/>than two dates.
   </h1>
   <p class="landing-sub fade-up" style="animation-delay:.1s">
-    Remnant holds what a life actually consisted of — the years, the places, the
-    photographs, the things someone meant to say. Drag through one and see.
+    Everyone who will ever know you arrives mid-story and meets whichever version you
+    already are. This records the one that exists today, addressed to someone who will
+    need it later — and asks again next month, and the month after that.
   </p>
 
-  <div class="hero-scrub fade-up" style="animation-delay:.15s">
+  <!-- The product is the day-one flow. The archive below it is the exhibit of what
+       the flow produces after years of it, not a second thing to go and fill in. -->
+  <div class="fade-up" style="animation-delay:.15s">
+    <button class="btn-primary" onclick="openDayOne()">Record today</button>
+    <div style="color:rgba(255,255,255,.5);font-size:.85rem;margin-top:.9rem">
+      Ten minutes. Four questions. One person it is addressed to.
+    </div>
+  </div>
+
+  <div class="hero-divider fade-up" style="animation-delay:.22s">
+    <span>and after twenty-eight years of it</span>
+  </div>
+
+  <div class="hero-scrub fade-up" style="animation-delay:.24s">
     <div class="scrub-head">
       <div class="scrub-year" id="hero-year">1951</div>
       <div class="scrub-era" id="hero-era">Before the bus</div>
@@ -1708,25 +1766,27 @@
     <div class="hero-hint">Drag — or use the arrow keys</div>
   </div>
 
-  <!-- The product is the day-one flow; the explorer below it is the exhibit of
-       what the flow produces after years of use. -->
-  <div class="fade-up" style="animation-delay:.18s;margin-top:2.6rem">
-    <button class="btn-primary" onclick="openDayOne()">Record today</button>
-    <div style="color:rgba(255,255,255,.45);font-size:.82rem;margin-top:.8rem">
-      Ten minutes. Four questions. One person it is addressed to.
-    </div>
+  <div class="fade-up" style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;align-items:center;animation-delay:.26s;margin-top:1.8rem">
+    <button class="btn-secondary" onclick="openExplore()">See what this becomes</button>
   </div>
 
-  <div class="fade-up" style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation-delay:.2s;margin-top:2.4rem">
-    <button class="btn-primary" onclick="openExplore()">Explore this life</button>
-    <button class="btn-secondary" onclick="openChapters()">Make a chapter of your own</button>
-  </div>
+  <!-- The exhibit was built backwards, and saying so is the argument for the
+       product rather than a thing to hope nobody notices. -->
+  <p class="hero-caveat fade-up" style="animation-delay:.28s">
+    This one was assembled backwards — twenty-eight years reconstructed over several
+    weeks, and half of it remembered rather than recorded. That is exactly what the
+    product does not ask you to do.
+  </p>
 
   <div class="tenets fade-up" style="animation-delay:.3s">
-    <div class="tenet"><span>01</span> See your life laid out, and recognize it.</div>
+    <div class="tenet"><span>01</span> Start with today, not with everything.</div>
     <div class="tenet"><span>02</span> Keep adding to it for as long as you're here.</div>
     <div class="tenet"><span>03</span> If the worst happens, none of it evaporates.</div>
   </div>
+
+  <button class="hero-aside fade-up" style="animation-delay:.34s" onclick="openChapters()">
+    Or try the photo curation on its own →
+  </button>
 </div>
 
 
@@ -1746,6 +1806,18 @@
       <h1 class="ex-name" id="ex-name">—</h1>
       <div class="ex-dates" id="ex-dates"></div>
       <p class="ex-tagline" id="ex-tagline"></p>
+
+      <!-- Stated here as well as on the landing page, because this is the view
+           people link to and arrive at directly. -->
+      <p class="ex-caveat">
+        <b>This record was assembled backwards.</b> Twenty-eight years reconstructed
+        over several weeks from a photo archive and memory — so half of it is
+        remembered rather than recorded, and the earliest years are the thinnest
+        precisely where they would matter most. It took long enough that almost
+        nobody would do it, which is the whole argument for
+        <a href="#" onclick="closeExplore();openDayOne();return false;">starting with today</a>
+        instead and letting everything below accumulate on its own.
+      </p>
 
       <div class="scrub">
         <div class="scrub-head">

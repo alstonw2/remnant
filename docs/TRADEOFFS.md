@@ -41,6 +41,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-31 | Day-one records keep their own storage key | Settled |
 | T-32 | The model may decline to ask, and that is shown | Settled |
 | T-33 | An unnamed record over a title nothing stands behind | Settled |
+| T-34 | Album extraction reads metadata before it reads pictures | Settled |
 
 ---
 
@@ -599,3 +600,26 @@ reader is being asked to judge.
 **Costs:** Without a key the product's most visible output is an empty slot, which demos badly. The
 honest version is less impressive than the dishonest one, which is the usual shape of this tradeoff.
 **Revisit when:** Never, unless naming moves on-device, at which point there is no failure to handle.
+
+
+## T-34 · Album extraction reads metadata before it reads pictures
+**Status:** Settled (scope) · v0.15
+
+**Chose:** The first version of album extraction reads EXIF only — dates and coordinates,
+in the browser, with no model call and no upload. Density, gaps, place clustering and the
+questions that come out of them are arithmetic on that metadata.
+**Over:** Per-image vision over the album, which is the version the idea sounds like and the
+version every competitor will ship.
+**Because:** The expensive half mostly reproduces what Google Photos and Apple Photos already
+do for free against a library they already hold, while the cheap half carries the entire
+argument — that an import is scaffolding and the *question* is the product. Metadata alone
+supports "eighty-three photographs, one location, April 2019, then nothing for five months",
+which is a better interview prompt than anything a caption model returns. It is also the only
+version that is honest about §4.1 today, because nothing leaves the device.
+**Costs:** No faces, so "who stops appearing" and "who is behind the camera" — the two most
+distinctive signals in §4.6.2 — are not available in the first version. Photographs without
+EXIF, or stripped of it by a messaging app, contribute nothing at all. Demos worse than the
+vision version, which is the usual shape of this tradeoff.
+**Revisit when:** §4.3 is resolved. Vision over image content is stage two and should not ship
+before the cloud/local question has an answer, because an album is a far larger disclosure
+than a timeline.

@@ -187,12 +187,90 @@ strongest AI decisions are all restraint (T-09, T-15). "Export your breakthrough
 growth loop" undercuts that in the same breath. If built: opt-in per entry, never prompted
 after an emotional one, and never defaulted on.
 
+
+### 4.6 Extraction from the user's own albums — `Next, in a reduced form`
+
+**The proposal.** A person hands over an album of photographs and video; the system
+extracts what it can and produces the scaffolding of a record, so that starting does not
+mean typing a life in from nothing. The onboarding problem is the real one — it is why
+the archive in §5 took weeks and why almost nobody would repeat it (T-30).
+
+**Why this is not the same as importing socials.** An earlier version of this idea pulled
+from Instagram, Facebook and LinkedIn. That one fails on its own premise: social history
+is the *performed* record, the nine frames chosen for an audience, which is the exact layer
+§0 says the product exists to get underneath. A camera roll is the opposite. It holds the
+twelve hundred that were taken — the bad frame, the one where someone is crying, the forty
+near-identical attempts at a shot that mattered. The unposted material is evidence; the
+posted material is a claim. Only the first is worth building on.
+
+It is also the only version that is practically available. Meta's Graph API does not expose
+a usable history, LinkedIn's is effectively closed, and scraping meets a login wall. A file
+the person chooses themselves has no such gate, and the browser already reads it (T-19, T-25).
+
+#### 4.6.1 Source, never record — `Requirement`
+Extracted material is **raw input, labelled and attributed as such.** The record is only what
+the person writes against it. This is not a stylistic preference:
+
+> The page states that everything in the archive is real and none of it is reconstructed.
+> A generated caption is a fabricated memory. The moment one is stored as record, that
+> sentence is false, and it is carrying most of the product's credibility.
+
+The operating rule: **the model may say what it sees, and what it noticed. Never what it
+meant.** "Eighty-three photographs, one location, April 2019" is observation. "A joyful
+week with family" is invention, and belongs to the person or to nobody.
+
+#### 4.6.2 What is worth extracting — `Design call`
+The obvious extraction — faces, places, dates, auto-albums, *your trip to Lisbon* — is what
+Google Photos and Apple Photos already do, free, on-device, against a library they already
+hold. Competing there is losing on someone else's ground.
+
+What nothing else computes, because nothing else has a reason to:
+
+| Signal | Why it is worth a question |
+|---|---|
+| **Who is behind the camera** | The person appearing in none of the photographs is often the one holding the family together. Absence from the frame is the finding. |
+| **Density anomalies** | Four hundred photographs in a week, then nothing for five months. The gap is the story, and it is arithmetic. |
+| **Who stops appearing** | A face across six years and two hundred frames, then never again. No one writes that prompt for themselves. |
+| **Near-duplicates** | Forty attempts at one shot is a record of having cared how it came out. |
+
+Each resolves to a **question**, which is the day-one flow's input (T-30). The extraction is
+not the output; it is what makes the interview specific. A prompt that already knows the
+date, the place and who was in frame is a different instrument from a blank box.
+
+#### 4.6.3 Video and audio are the larger case — `North star`
+A photograph is silent. Video carries **the voice** — speech, laughter, cadence, and the
+language itself. This is §4.4 arriving from the other direction: the material that second-
+generation families are actually losing is not a list of events, it is the sound of someone
+talking. A family video holds a grandmother speaking Hainanese; nothing the family writes
+down substitutes for it.
+
+So the two cases should be scoped apart rather than as one feature. **Photographs save
+manual work. Video is itself the artefact**, and the §4.4 rule applies to it directly: keep
+the audio as primary and treat the transcript as the index.
+
+#### 4.6.4 What this costs, and what ships first — `Constraint`
+Full extraction is the most expensive thing in this document: per-image vision calls, face
+clustering, duplicate detection, and a video pipeline that cannot live in a browser-only app
+with localStorage. It also lands squarely on §4.3 — an album is a far larger disclosure than
+a timeline, and shipping it to a cloud model widens the contradiction rather than resolving it.
+
+**Therefore the first version reads metadata only.** Dates and coordinates come out of EXIF
+in the browser, with no model call, no upload and no per-image cost. Density, gaps, clustering
+by place and the resulting questions are all arithmetic on that metadata. It demonstrates the
+whole thesis — *import is scaffold, the question is the product* — for a fraction of the cost,
+and it is the only version that is honest about §4.1 today, because nothing leaves the device.
+
+Vision over image content is a second stage, gated on §4.3 being resolved.
+
 ---
 
 ## 5. What already ships
 
 | | |
 |---|---|
+| A day-one flow: four present-tense questions, one named reader, sealed | T-30, T-31 |
+| An AI interviewer that may decline to ask, and shows the refusal | T-32 |
+| Age stamped at the time of writing, so age-matched delivery needs no backfill | T-30 |
 | An explorable record — timeline, map, chapters, learnings | T-01, T-11, T-22 |
 | Real inference for era grouping and ranking, with provenance | T-16, T-24 |
 | Photo curation with per-frame reasoning, staleness-checked | T-25, T-27 |
@@ -200,6 +278,11 @@ after an emotional one, and never defaulted on.
 | What the model declined to promote, and why | T-14 |
 | Retrieval that returns nothing rather than inferring | T-09, T-15 |
 | Per-entry visibility, shape kept and contents withheld | T-18 |
+| A record that states how it was built, including what was reconstructed | T-30 |
+
+**Not yet shipped, and the honest gap:** a day-one record cannot render in the explorer. The
+claim that twelve sittings become the archive is currently stated rather than demonstrated,
+and §4.6 is the route that closes it.
 
 The through-line from here to the north star: **the product's job is to put two people at the
 same age in the same room — and nothing else can do it, because nothing else holds both lives.**
