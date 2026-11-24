@@ -36,7 +36,7 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-26 | Chapters are defined in the scaffold, not in code | Settled |
 | T-27 | Curation carries a fingerprint of what it saw | Settled |
 | T-28 | Every entry states whether it has a place | Settled |
-| T-29 | Cloud AI today, against a stated zero-knowledge requirement | **Open** |
+| T-29 | Cloud AI today, against a stated zero-knowledge requirement | **Revised v0.16** |
 | T-30 | First sitting asks for today, not for a life | Settled |
 | T-31 | Day-one records keep their own storage key | Settled |
 | T-32 | The model may decline to ask, and that is shown | Settled |
@@ -44,6 +44,8 @@ condition that should make us reopen it. An entry with no cost listed is probabl
 | T-34 | Album extraction reads metadata before it reads pictures | Settled |
 | T-35 | The day-one flow opens on a finished example, not on the ask | Settled |
 | T-36 | Restraint is kept in the sealed record, not just shown live | Settled |
+| T-37 | The seal is the privacy boundary, not the product | Settled |
+| T-38 | Drift is an explicit act by the author, never automatic | Settled |
 
 ---
 
@@ -522,7 +524,9 @@ dropped, or shown only while authoring.
 
 
 ## T-29 · Cloud AI today, against a stated zero-knowledge requirement
-**Status:** Open · v0.14
+**Status:** **Revised v0.16 — superseded by T-37.** Kept because the open period, and what
+was shipped during it, is part of the record.
+· v0.14
 
 **Chose (so far):** Era derivation and ranking go to the Claude API carrying the record —
 timeline, achievements, and the person's own written learnings. Curation sends downscaled
@@ -662,3 +666,48 @@ to a person, who may not want the interviewer's notes in their inheritance. A pe
 about whether the model's turn survives into delivery is probably correct and does not exist yet.
 **Revisit when:** Letters are actually delivered. At that point "what the recipient sees" and
 "what the record holds" stop being the same thing and must be separated.
+
+
+## T-37 · The seal is the privacy boundary, not the product
+**Status:** Settled · v0.16 — supersedes T-29
+
+**Chose:** Split the vault at the seal. A record being written is a tool the author is using
+and may be processed in the cloud under zero-retention terms (§4.2). Anything past its seal
+point is mail, is encrypted client-side, and no model ever sees it.
+**Over:** (a) everything local, which honours §3.1 completely but ships materially weaker
+judgment, and judgment is the only thing this product is really demonstrating; (b) zero-retention
+cloud for everything, which is simplest and rests the whole promise on a contract rather than on
+mathematics — a different promise from the one §3.1 makes.
+**Because:** Zero-knowledge was always the right guarantee for *capsules* and never the right
+guarantee for a drafting tool. Collapsing both into one promise is what produced the
+contradiction in the first place; the requirement was over-broad, not the implementation wrong.
+Stating the boundary as one sentence — *before the seal it is a tool, after the seal it is mail* —
+resolves it without weakening the part that matters.
+**Costs:** The living record, which is most of what a person writes, is processed in the cloud,
+and "zero-retention" is a contractual claim rather than a mathematical one. Anyone who expected
+§3.1 to cover everything they ever typed will read this as a retreat, and they would not be
+entirely wrong. The split also puts a sharp edge in the product that has to be explained to
+users at exactly the moment they are least interested in reading about architecture.
+**Revisit when:** On-device models close the judgment gap. At that point route (a) becomes
+available without sacrificing the demonstration, and this entry should be revised again rather
+than defended.
+
+## T-38 · Drift is an explicit act by the author, never automatic
+**Status:** Settled · v0.16
+
+**Chose:** Comparing a new sitting against an earlier sealed one is offered on the finished
+letter as a button, and runs only when pressed. The copy says plainly what pressing it does:
+unseals the earlier record and sends both to the model.
+**Over:** Running it automatically at seal time, which is what shipped in T-30 and which read
+a sealed record and sent it to the API without being asked.
+**Because:** T-37 says nothing crosses the seal toward a model on its own. The author is not
+a third party and may always re-open their own record — they hold the key — but the moment it
+happens automatically it is the *system* deciding to decrypt rather than the person, which is
+precisely the thing the boundary exists to prevent. This was a live violation of a rule written
+in the same session, which is an argument for writing rules down where the code can be checked
+against them.
+**Costs:** Drift is the hook that makes a second sitting worth doing, and it is now behind a
+button carrying a deliberately off-putting sentence. Fewer people will see the feature that most
+justifies coming back. That is the correct trade and it is still a real cost.
+**Revisit when:** Capsules are actually encrypted. The question then becomes whether an author
+re-opening their own capsule should need to re-authenticate, which is a different decision.

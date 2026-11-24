@@ -12,7 +12,7 @@ condition you choose. **Death is one delivery trigger, not the premise.**
 **Live:** [alstonwang.com/remnant.html](https://alstonwang.com/remnant.html)
 
 > The interesting part of this project is not the features. It is
-> [`docs/TRADEOFFS.md`](docs/TRADEOFFS.md) — thirty-six decisions with the cost each one
+> [`docs/TRADEOFFS.md`](docs/TRADEOFFS.md) — thirty-eight decisions with the cost each one
 > paid — and [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md) §4.3, which is a section
 > explaining where the stated requirements contradict what is actually built.
 

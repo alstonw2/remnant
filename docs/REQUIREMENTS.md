@@ -139,35 +139,58 @@ biases toward under-firing: notify the author on every channel, wait, then ask t
 
 ## 4. AI under a zero-knowledge constraint
 
-### 4.1 Sandboxed local models — `Stated, not built`
+### 4.1 Sandboxed local models — `Scoped by §4.3`
 Transcription, memory cross-referencing and similar tasks run **on the user's own device**,
 not by shipping raw audio and text to a central server.
 
-### 4.2 Contractual data firewalls — `Stated, not built`
+### 4.2 Contractual data firewalls — `Required for everything §4.3 permits`
 Any cloud processing must use temporary, **zero-retention** endpoints, so personal
 vulnerabilities, financial difficulty and family secrets never enter commercial training
 pools.
 
-### 4.3 This contradicts what is currently built — `Open, must resolve`
-**Stated plainly because a requirements document that hides its own conflict is worthless:**
+### 4.3 Resolved — the seal is the boundary — `Decided, partly built`
 
-Remnant today sends the record — timeline, achievements, the person's own written learnings —
-to the Claude API for era derivation and ranking (T-16, T-24), and sends downscaled
-photographs for curation (T-25). That is cloud processing of exactly the material 4.1 and 4.2
-say must stay local.
+**The conflict, as it stood.** Remnant sends the record — timeline, achievements, the
+person's own written learnings — to the Claude API for era derivation and ranking (T-16,
+T-24), sends downscaled photographs for curation (T-25), and sends the day-one answers for
+follow-up and naming (T-30). That is cloud processing of exactly the material §4.1 and §4.2
+said must stay local. Three routes were open: everything local, split the vault, or
+zero-retention cloud for everything.
 
-Three routes, none free:
+**Decided: split the vault (T-37).** The rule is one sentence:
 
-1. **Everything local.** Honours 3.1 fully. On-device models are materially weaker at the
-   judgment tasks the product is built to show, and the page's strongest feature is the
-   quality of that judgment.
-2. **Split the vault.** The *living record* is processable; *sealed capsules* are opaque until
-   triggered. Your record is a tool you use; your capsules are mail nobody can open. This is
-   the most coherent option and resolves the tension in one sentence.
-3. **Zero-retention cloud for everything.** Simplest to build, weakest claim — it rests on a
-   contract rather than on mathematics, which is a different promise from 3.1.
+> **Before the seal, a record is a tool you are using. After the seal, it is mail nobody
+> can open.** The seal is the boundary, and nothing crosses it in the direction of a model.
 
-**Leaning toward (2).** Until it is decided, the product must not claim zero-knowledge.
+| | Processable in the cloud | Never |
+|---|---|---|
+| A record being written or edited | ✓ zero-retention, §4.2 | |
+| A day-one sitting in progress — follow-ups, naming | ✓ | |
+| Era derivation, ranking, photo curation | ✓ | |
+| Anything past its seal point, awaiting a trigger | | ✗ encrypted client-side, no model ever |
+| A capsule in transit to its recipient | | ✗ |
+
+This resolves the contradiction honestly rather than by weakening §3.1. Zero-knowledge was
+always the right promise for *capsules* and was never the right promise for a drafting tool —
+the strongest feature of this product is the quality of the model's judgment while you write,
+and the one thing that must be inviolable is the letter after you have sealed it. Collapsing
+those two into a single guarantee is what produced the contradiction.
+
+**The author is not a third party.** A person can always decrypt their own capsules; they hold
+the key. So re-reading an old sealed record and asking the model about it is permitted — but
+only as an **explicit act by the author in session**, never automatically, because the moment
+it is automatic the system is deciding to decrypt rather than the person. This was a live
+violation: drift analysis read a prior sealed record and shipped it to the API without being
+asked (fixed in T-38).
+
+**What is still not built, and therefore still may not be claimed.**
+Sealing today means a flag in localStorage. There is no client-side encryption, no key
+derivation, no guardian sharding (§3.2). The *rule* is decided; the *cryptography* is not.
+
+> Until §3.1 is implemented, the product may describe the boundary and may not claim it is
+> enforced. "Sealed capsules are never sent to a model" is true today and is a policy
+> statement. "The server cannot read your capsules" is not true today, because there is no
+> server and no encryption — and it must not be written anywhere until both exist.
 
 ### 4.4 Multilingual capture — `Next`
 Built-in audio and video recording with transcription and translation. The specific need:

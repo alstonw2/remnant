@@ -1924,7 +1924,7 @@
       <!-- The register is the strongest part of this project and was previously
            only reachable by cloning the repository. -->
       <p class="ex-decisions">
-        Every non-obvious decision behind this page — thirty-six of them, each with the
+        Every non-obvious decision behind this page — thirty-eight of them, each with the
         alternative it rejected and the price it paid — is written down in
         <a href="https://github.com/alstonw2/remnant/blob/main/docs/TRADEOFFS.md" target="_blank" rel="noopener">the tradeoff register</a>,
         next to <a href="https://github.com/alstonw2/remnant/blob/main/docs/REQUIREMENTS.md" target="_blank" rel="noopener">a specification
@@ -2724,7 +2724,7 @@
         Everything stays in this browser. Nothing is uploaded except the words you
         answer with, and only to generate the follow-up questions.
         <br/><br/>
-        Every non-obvious decision in this project — thirty-six of them, each with what it
+        Every non-obvious decision in this project — thirty-eight of them, each with what it
         cost — is written down in
         <a href="https://github.com/alstonw2/remnant/blob/main/docs/TRADEOFFS.md" target="_blank" rel="noopener">the tradeoff register</a>,
         alongside <a href="https://github.com/alstonw2/remnant/blob/main/docs/REQUIREMENTS.md" target="_blank" rel="noopener">a spec
@@ -5529,22 +5529,11 @@ async function d1Seal() {
     d1.naming.at = new Date().toISOString();
   } catch (e) { d1.naming = { error: e.message }; }
 
-  // Drift needs two sittings to the same reader. Never invented on day one.
-  const prior = d1All.filter(x => (x.to.name || '').toLowerCase() === (d1.to.name || '').toLowerCase());
-  const last  = prior[prior.length - 1];
-  if (last) {
-    try {
-      d1.drift = await d1Call('demo/dispatch-drift-prompt.txt', {
-        '{EARLIER_DATE}': new Date(last.createdAt).toLocaleDateString(),
-        '{EARLIER_AGE}':  String(last.authorAge),
-        '{EARLIER}':      d1SessionText(last),
-        '{NOW_DATE}':     new Date().toLocaleDateString(),
-        '{NOW_AGE}':      String(d1.authorAge),
-        '{NOW}':          session
-      }, 500);
-      d1.drift.model = D1_MODEL;
-    } catch (e) { d1.drift = null; }
-  }
+  // Drift compares this sitting against an earlier *sealed* one. Under §4.3 the
+  // seal is the boundary and nothing crosses it toward a model on its own — the
+  // author may re-open their own record, but it has to be their act, not ours.
+  // So this is offered on the finished letter and never runs at seal time (T-38).
+  d1.drift = null;
 
   pushRevision(d1.revisions, {
     answers: d1.answers, to: d1.to, trigger: d1.trigger
@@ -5557,6 +5546,44 @@ async function d1Seal() {
 
   d1RenderLetter(d1);
   d1Step(5);
+}
+
+// Is there an earlier sealed sitting to the same reader?
+function d1HasPrior(d) {
+  return d1All.some(x => x.id !== d.id &&
+    (x.to.name || '').toLowerCase() === (d.to.name || '').toLowerCase() &&
+    Date.parse(x.sealedAt || x.createdAt) < Date.parse(d.sealedAt || d.createdAt));
+}
+
+// Only ever reached by the author pressing the button. §4.3, T-38.
+async function d1Compare(id) {
+  const d = d1All.find(x => x.id === id);
+  if (!d) return;
+  const prior = d1All.filter(x => x.id !== d.id &&
+    (x.to.name || '').toLowerCase() === (d.to.name || '').toLowerCase() &&
+    Date.parse(x.sealedAt || x.createdAt) < Date.parse(d.sealedAt || d.createdAt));
+  const last = prior[prior.length - 1];
+  if (!last) return;
+
+  const box = document.getElementById('d1-drift-offer');
+  box.innerHTML = '<div class="d1-thinking"><span></span><span></span><span></span>' +
+                  'Reading both…</div>';
+  try {
+    d.drift = await d1Call('demo/dispatch-drift-prompt.txt', {
+      '{EARLIER_DATE}': new Date(last.sealedAt || last.createdAt).toLocaleDateString(),
+      '{EARLIER_AGE}':  String(last.authorAge),
+      '{EARLIER}':      d1SessionText(last),
+      '{NOW_DATE}':     new Date(d.sealedAt || d.createdAt).toLocaleDateString(),
+      '{NOW_AGE}':      String(d.authorAge),
+      '{NOW}':          d1SessionText(d)
+    }, 500);
+    d.drift.model = D1_MODEL;
+    d1Save();
+  } catch (e) {
+    box.innerHTML = '<div class="d1-drift-h">Could not compare</div><p>' + esc(e.message) + '</p>';
+    return;
+  }
+  d1RenderLetter(d);
 }
 
 function d1SessionText(d) {
@@ -5636,7 +5663,16 @@ function d1RenderLetter(d) {
       (d.drift && d.drift.what
         ? '<div class="d1-drift"><div class="d1-drift-h">What moved since last time</div>' +
           '<p>' + esc(d.drift.what) + '</p></div>'
-        : '') +
+        : d1HasPrior(d)
+          ? '<div class="d1-drift" id="d1-drift-offer">' +
+              '<div class="d1-drift-h">An earlier entry exists for ' + esc(d.to.name || 'them') + '</div>' +
+              '<p>Comparing them means unsealing the earlier one and sending both to the model. ' +
+              'That is your decision to make, not something this does on your behalf.</p>' +
+              '<div class="d1-actions" style="margin-top:.9rem">' +
+                '<button class="d1-btn" onclick="d1Compare(&quot;' + d.id + '&quot;)">Unseal it and compare</button>' +
+              '</div>' +
+            '</div>'
+          : '') +
       '<div class="d1-recall">' +
         '<div class="d1-recall-cal"><b>' +
           next.toLocaleDateString('en-US', { month: 'short' }) + '</b><i>' +
